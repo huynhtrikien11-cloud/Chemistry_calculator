@@ -38,8 +38,8 @@
     <main class="container">
         <!-- Hero Search Section -->
         <section class="hero">
-            <h1>Read and Share <span>Comics</span> Locally</h1>
-            <p>A fully static, serverless comic platform. Upload comic books as ZIP/CBZ archives or image lists directly in your browser. All your content is stored securely on your device using IndexedDB.</p>
+            <h1>Read <span>Story Comics</span> Online</h1>
+            <p>Read text-based comic stories page by page, or upload your own comic images and chapters directly in the browser.</p>
             
             <form action="index.html" method="GET" class="search-form" id="search-form">
                 <input type="text" name="search" id="search-input" placeholder="Search by title or author..." class="search-input">
@@ -71,6 +71,7 @@
     </footer>
 
     <!-- Database and script -->
+    <script src="static/js/stories.js"></script>
     <script src="static/js/db.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
@@ -89,7 +90,13 @@
 
             try {
                 // Fetch comics from IndexedDB
-                const comics = await ComicDB.getAllComics(searchParam);
+                const savedComics = await ComicDB.getAllComics(searchParam);
+                const query = searchParam.toLowerCase().trim();
+                const staticComics = (window.StaticStories || []).filter(comic => {
+                    if (!query) return true;
+                    return comic.title.toLowerCase().includes(query) || comic.author.toLowerCase().includes(query);
+                });
+                const comics = [...staticComics, ...savedComics];
                 comicsGrid.innerHTML = ''; // clear loader
 
                 if (comics.length === 0) {
@@ -106,7 +113,9 @@
                 // Render each comic card
                 comics.forEach(comic => {
                     const card = document.createElement('a');
-                    card.href = `comic.html?id=${comic.id}`;
+                    card.href = comic.storyText && String(comic.id).includes('-')
+                        ? `comic.html?id=static-${comic.id}`
+                        : `comic.html?id=${comic.id}`;
                     card.className = 'comic-card';
 
                     // Cover Art Handler

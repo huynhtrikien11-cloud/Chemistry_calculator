@@ -51,6 +51,7 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="static/js/stories.js"></script>
     <script src="static/js/db.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
@@ -67,13 +68,16 @@
 
             try {
                 // Fetch comic and pages from database
-                const comic = await ComicDB.getComic(comicId);
+                const staticStoryId = comicId.startsWith('static-') ? comicId.replace('static-', '') : '';
+                const comic = staticStoryId
+                    ? (window.StaticStories || []).find(story => story.id === staticStoryId)
+                    : await ComicDB.getComic(comicId);
                 if (!comic) {
                     renderError('Comic not found! It may have been deleted.');
                     return;
                 }
 
-                const pages = await ComicDB.getComicPages(comicId);
+                const pages = staticStoryId ? [] : await ComicDB.getComicPages(comicId);
                 const storyPageCount = paginateStoryText(comic.storyText || '').length;
 
                 // Set page title
@@ -121,10 +125,10 @@
                         <div class="detail-sidebar">
                             ${coverHtml}
                             <div class="detail-actions">
-                                <a href="reader.html?id=${comic.id}" class="btn btn-primary" style="flex: 1;">
+                                <a href="reader.html?id=${staticStoryId ? `static-${comic.id}` : comic.id}" class="btn btn-primary" style="flex: 1;">
                                     <i class="fa-solid fa-play"></i> Read Now
                                 </a>
-                                <button id="delete-btn" class="btn btn-danger" title="Delete Comic">
+                                <button id="delete-btn" class="btn btn-danger" title="Delete Comic" ${staticStoryId ? 'style="display:none;"' : ''}>
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>

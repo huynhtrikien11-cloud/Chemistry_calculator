@@ -2,22 +2,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Upload Method Toggles
     const tabImages = document.getElementById('tab-images');
     const tabArchive = document.getElementById('tab-archive');
+    const tabText = document.getElementById('tab-text');
     const groupImages = document.getElementById('group-images-upload');
     const groupArchive = document.getElementById('group-archive-upload');
+    const groupText = document.getElementById('group-text-upload');
     const pagesInput = document.getElementById('pages-input');
     const archiveInput = document.getElementById('archive-input');
+    const storyTextInput = document.getElementById('story-text-input');
     const pagesPreview = document.getElementById('pages-preview-list');
     const archivePreview = document.getElementById('archive-preview-list');
 
-    let currentUploadMethod = 'images'; // 'images' or 'archive'
+    let currentUploadMethod = 'images'; // 'images', 'archive', or 'text'
 
-    if (tabImages && tabArchive) {
+    if (tabImages && tabArchive && tabText) {
         tabImages.addEventListener('click', () => {
             currentUploadMethod = 'images';
             tabImages.classList.add('active');
             tabArchive.classList.remove('active');
+            tabText.classList.remove('active');
             groupImages.style.display = 'block';
             groupArchive.style.display = 'none';
+            groupText.style.display = 'none';
             // Clear archive input
             archiveInput.value = '';
             if (archivePreview) {
@@ -30,13 +35,35 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUploadMethod = 'archive';
             tabArchive.classList.add('active');
             tabImages.classList.remove('active');
+            tabText.classList.remove('active');
             groupArchive.style.display = 'block';
             groupImages.style.display = 'none';
+            groupText.style.display = 'none';
             // Clear pages input
             pagesInput.value = '';
             if (pagesPreview) {
                 pagesPreview.style.display = 'none';
                 pagesPreview.innerHTML = '';
+            }
+        });
+
+        tabText.addEventListener('click', () => {
+            currentUploadMethod = 'text';
+            tabText.classList.add('active');
+            tabImages.classList.remove('active');
+            tabArchive.classList.remove('active');
+            groupText.style.display = 'block';
+            groupImages.style.display = 'none';
+            groupArchive.style.display = 'none';
+            pagesInput.value = '';
+            archiveInput.value = '';
+            if (pagesPreview) {
+                pagesPreview.style.display = 'none';
+                pagesPreview.innerHTML = '';
+            }
+            if (archivePreview) {
+                archivePreview.style.display = 'none';
+                archivePreview.innerHTML = '';
             }
         });
     }
@@ -169,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const title = document.getElementById('title').value.trim();
             const author = document.getElementById('author').value.trim();
             const description = document.getElementById('description').value.trim();
+            const storyText = storyTextInput ? storyTextInput.value.trim() : '';
 
             if (!title) {
                 alert('Title is required!');
@@ -183,6 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentUploadMethod === 'archive' && (!archiveInput.files || archiveInput.files.length === 0)) {
                 alert('Please select a ZIP or CBZ file to upload!');
+                return;
+            }
+
+            if (currentUploadMethod === 'text' && !storyText) {
+                alert('Please write or paste your story content!');
                 return;
             }
 
@@ -265,13 +298,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         const typedBlob = new Blob([fileBlob], { type: mimeType });
                         pageBlobs.push(typedBlob);
                     }
+                } else if (currentUploadMethod === 'text') {
+                    loadingTitle.innerText = "Preparing Story Text...";
+                    loadingDescription.innerText = "Saving your written chapter for the page-by-page reader.";
                 }
 
                 // 3. Save to database
                 loadingTitle.innerText = "Saving to Database...";
                 loadingDescription.innerText = "Writing pages to local IndexedDB storage.";
                 
-                const comicId = await ComicDB.saveComic(title, author, description, coverBlob, pageBlobs);
+                const comicId = await ComicDB.saveComic(title, author, description, coverBlob, pageBlobs, storyText);
 
                 // Success redirect
                 loadingTitle.innerText = "Publishing Complete!";

@@ -74,6 +74,7 @@
                 }
 
                 const pages = await ComicDB.getComicPages(comicId);
+                const storyPageCount = paginateStoryText(comic.storyText || '').length;
 
                 // Set page title
                 document.title = `${comic.title} - ComicVerse`;
@@ -94,15 +95,24 @@
 
                 // Page previews layout
                 let pagesHtml = '';
-                pages.forEach(page => {
-                    const pageUrl = URL.createObjectURL(page.pageBlob);
-                    pagesHtml += `
-                        <div class="page-thumbnail-card">
-                            <img src="${pageUrl}" alt="Page ${page.pageNumber}" class="page-thumbnail" loading="lazy" onload="window.URL.revokeObjectURL('${pageUrl}')">
-                            <div class="page-number-badge">${page.pageNumber}</div>
+                if (storyPageCount > 0) {
+                    pagesHtml = `
+                        <div class="story-preview-card">
+                            <i class="fa-solid fa-align-left"></i>
+                            <span>${storyPageCount} text pages</span>
                         </div>
                     `;
-                });
+                } else {
+                    pages.forEach(page => {
+                        const pageUrl = URL.createObjectURL(page.pageBlob);
+                        pagesHtml += `
+                            <div class="page-thumbnail-card">
+                                <img src="${pageUrl}" alt="Page ${page.pageNumber}" class="page-thumbnail" loading="lazy" onload="window.URL.revokeObjectURL('${pageUrl}')">
+                                <div class="page-number-badge">${page.pageNumber}</div>
+                            </div>
+                        `;
+                    });
+                }
 
                 // Set detail contents
                 container.innerHTML = `
@@ -131,7 +141,7 @@
                             <h2 class="detail-desc-title">Description</h2>
                             <p class="detail-desc">${escapeHTML(comic.description) || 'No description provided.'}</p>
                             
-                            <h2 class="detail-desc-title" style="margin-bottom: 20px;">Pages Preview (${pages.length} pages)</h2>
+                            <h2 class="detail-desc-title" style="margin-bottom: 20px;">Pages Preview (${storyPageCount || pages.length} pages)</h2>
                             <div class="pages-preview-grid">
                                 ${pagesHtml || '<p style="color:var(--text-muted);">No pages found.</p>'}
                             </div>
@@ -179,6 +189,28 @@
                 return str.replace(/[&<>'"]/g, 
                     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
                 );
+            }
+
+            function paginateStoryText(text) {
+                const normalized = text.trim().replace(/\r\n/g, '\n');
+                if (!normalized) return [];
+
+                const paragraphs = normalized.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean);
+                const pages = [];
+                let currentPage = '';
+                const maxChars = 950;
+
+                paragraphs.forEach(paragraph => {
+                    if ((currentPage + '\n\n' + paragraph).trim().length > maxChars && currentPage) {
+                        pages.push(currentPage);
+                        currentPage = paragraph;
+                    } else {
+                        currentPage = (currentPage ? `${currentPage}\n\n` : '') + paragraph;
+                    }
+                });
+
+                if (currentPage) pages.push(currentPage);
+                return pages;
             }
         });
     </script>

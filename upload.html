@@ -85,6 +85,9 @@
                         <div class="method-tab" id="tab-archive">
                             <i class="fa-solid fa-file-zipper"></i> ZIP / CBZ Archive
                         </div>
+                        <div class="method-tab" id="tab-text">
+                            <i class="fa-solid fa-align-left"></i> Story Text
+                        </div>
                     </div>
                 </div>
                 
@@ -110,6 +113,13 @@
                         <input type="file" id="archive-input" name="archive" accept=".zip,.cbz" style="display: none;">
                     </div>
                     <div id="archive-preview-list" class="file-list-preview" style="display: none;"></div>
+                </div>
+
+                <!-- Option 3: Story Text -->
+                <div class="form-group" id="group-text-upload" style="display: none;">
+                    <label for="story-text-input">Story Content *</label>
+                    <textarea id="story-text-input" name="storyText" class="form-control story-textarea" placeholder="Paste or write your story here. Blank lines are kept as paragraph breaks. The reader will split it into pages automatically."></textarea>
+                    <p class="form-help">Tip: use blank lines between paragraphs. Readers can press the left and right arrow keys to turn pages.</p>
                 </div>
                 
                 <!-- Submit Button -->

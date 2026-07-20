@@ -502,6 +502,23 @@ footer {
     border-radius: 4px;
     font-weight: 600;
 }
+.story-preview-card {
+    min-height: 140px;
+    border-radius: 8px;
+    border: var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 600;
+}
+.story-preview-card i {
+    color: var(--accent-purple);
+    font-size: 28px;
+}
 
 /* Upload Page */
 .upload-card {
@@ -617,6 +634,16 @@ textarea.form-control {
     border-color: var(--accent-indigo);
     color: var(--text-primary);
 }
+.story-textarea {
+    min-height: 360px;
+    line-height: 1.7;
+}
+.form-help {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
 
 /* Reader CSS - Minimal and Fullscreen-focused */
 .reader-body {
@@ -714,12 +741,40 @@ textarea.form-control {
     border-radius: 8px;
     overflow: hidden;
 }
+.slider-stage.text-slider-stage {
+    max-height: none;
+    overflow: visible;
+    box-shadow: none;
+}
 .slider-image {
     display: block;
     max-width: 100%;
     max-height: calc(100vh - 180px);
     width: auto;
     height: auto;
+}
+.text-page {
+    width: min(760px, calc(100vw - 32px));
+    min-height: calc(100vh - 190px);
+    padding: clamp(28px, 6vw, 64px);
+    background: #101119;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+    color: #f8fafc;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+}
+.text-page p {
+    margin-bottom: 1em;
+}
+.text-reader-hint {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 12px;
+    text-align: center;
 }
 .slider-nav {
     position: absolute;

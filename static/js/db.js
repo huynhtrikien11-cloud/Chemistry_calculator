@@ -34,7 +34,7 @@ function openDB() {
 
 const ComicDB = {
     // Save comic metadata and pages
-    async saveComic(title, author, description, coverBlob, pageBlobs) {
+    async saveComic(title, author, description, coverBlob, pageBlobs, storyText = '') {
         const db = await openDB();
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['comics', 'pages'], 'readwrite');
@@ -51,6 +51,7 @@ const ComicDB = {
                 author,
                 description,
                 coverBlob,
+                storyText,
                 createdAt: new Date().toISOString()
             };
 

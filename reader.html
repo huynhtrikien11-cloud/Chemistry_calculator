@@ -73,6 +73,7 @@
         <div class="slider-container" id="slider-reader-view">
             <div class="slider-stage">
                 <img id="slider-image-element" src="" alt="Comic Page" class="slider-image">
+                <div id="slider-text-element" class="text-page" style="display: none;"></div>
                 
                 <button class="slider-nav slider-nav-prev" id="slider-prev-btn" title="Previous Page">
                     <i class="fa-solid fa-chevron-left"></i>
@@ -135,7 +136,10 @@
                 }
 
                 const pages = await ComicDB.getComicPages(comicId);
-                if (pages.length === 0) {
+                const textPages = paginateStoryText(comic.storyText || '');
+                const isTextStory = textPages.length > 0;
+
+                if (pages.length === 0 && !isTextStory) {
                     loadingPanel.innerHTML = '<p style="color:#f87171;">Error: Comic contains no pages.</p><a href="comic.html?id=' + comicId + '" class="btn btn-primary" style="margin-top:15px;">Go Back</a>';
                     return;
                 }
@@ -149,15 +153,26 @@
                     number: p.pageNumber,
                     url: URL.createObjectURL(p.pageBlob)
                 }));
+                const totalPages = isTextStory ? textPages.length : pageUrls.length;
 
                 // Populate Scroll Mode Container
-                pageUrls.forEach(p => {
-                    const pageDiv = document.createElement('div');
-                    pageDiv.className = 'scroll-page';
-                    pageDiv.setAttribute('data-page', p.number);
-                    pageDiv.innerHTML = `<img src="${p.url}" alt="Page ${p.number}" loading="lazy">`;
-                    scrollReaderView.appendChild(pageDiv);
-                });
+                if (isTextStory) {
+                    textPages.forEach((text, index) => {
+                        const pageDiv = document.createElement('div');
+                        pageDiv.className = 'scroll-page';
+                        pageDiv.setAttribute('data-page', index + 1);
+                        pageDiv.innerHTML = `<div class="text-page">${formatStoryText(text)}</div>`;
+                        scrollReaderView.appendChild(pageDiv);
+                    });
+                } else {
+                    pageUrls.forEach(p => {
+                        const pageDiv = document.createElement('div');
+                        pageDiv.className = 'scroll-page';
+                        pageDiv.setAttribute('data-page', p.number);
+                        pageDiv.innerHTML = `<img src="${p.url}" alt="Page ${p.number}" loading="lazy">`;
+                        scrollReaderView.appendChild(pageDiv);
+                    });
+                }
 
                 // Hide loading, show main viewer
                 loadingPanel.style.display = 'none';
@@ -172,10 +187,10 @@
                 const savedPage = localStorage.getItem(`comic_page_${comicId}`);
                 
                 if (savedPage) {
-                    currentPageIndex = Math.max(0, Math.min(parseInt(savedPage) - 1, pageUrls.length - 1));
+                    currentPageIndex = Math.max(0, Math.min(parseInt(savedPage) - 1, totalPages - 1));
                 }
 
-                if (savedMode === 'slide') {
+                if (isTextStory || savedMode === 'slide') {
                     setMode('slide');
                 } else {
                     setMode('scroll');
@@ -211,10 +226,26 @@
 
                 // Render Slide page
                 function renderSlidePage() {
-                    const page = pageUrls[currentPageIndex];
-                    sliderImg.src = page.url;
-                    pageIndicator.innerText = `Page ${page.number} of ${pageUrls.length}`;
-                    localStorage.setItem(`comic_page_${comicId}`, page.number);
+                    const sliderText = document.getElementById('slider-text-element');
+                    const sliderStage = sliderText.parentElement;
+                    const pageNumber = currentPageIndex + 1;
+
+                    if (isTextStory) {
+                        sliderStage.classList.add('text-slider-stage');
+                        sliderImg.style.display = 'none';
+                        sliderImg.removeAttribute('src');
+                        sliderText.style.display = 'block';
+                        sliderText.innerHTML = formatStoryText(textPages[currentPageIndex]);
+                    } else {
+                        const page = pageUrls[currentPageIndex];
+                        sliderStage.classList.remove('text-slider-stage');
+                        sliderText.style.display = 'none';
+                        sliderImg.style.display = 'block';
+                        sliderImg.src = page.url;
+                    }
+
+                    pageIndicator.innerText = `Page ${pageNumber} of ${totalPages}`;
+                    localStorage.setItem(`comic_page_${comicId}`, pageNumber);
                     updateProgress();
                     window.scrollTo({ top: 0, behavior: 'instant' });
                 }
@@ -228,14 +259,14 @@
                             percentage = (window.scrollY / scrollHeight) * 100;
                         }
                     } else {
-                        percentage = ((currentPageIndex + 1) / pageUrls.length) * 100;
+                        percentage = ((currentPageIndex + 1) / totalPages) * 100;
                     }
                     progressFill.style.width = `${percentage}%`;
                 }
 
                 // Slide actions
                 function nextPage() {
-                    if (currentPageIndex < pageUrls.length - 1) {
+                    if (currentPageIndex < totalPages - 1) {
                         currentPageIndex++;
                         renderSlidePage();
                     }
@@ -323,6 +354,41 @@
             } catch (err) {
                 console.error(err);
                 loadingPanel.innerHTML = '<p style="color:#f87171;">Failed to load reader: ' + err.message + '</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Return Home</a>';
+            }
+
+            function paginateStoryText(text) {
+                const normalized = text.trim().replace(/\r\n/g, '\n');
+                if (!normalized) return [];
+
+                const paragraphs = normalized.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean);
+                const pages = [];
+                let currentPage = '';
+                const maxChars = 950;
+
+                paragraphs.forEach(paragraph => {
+                    if ((currentPage + '\n\n' + paragraph).trim().length > maxChars && currentPage) {
+                        pages.push(currentPage);
+                        currentPage = paragraph;
+                    } else {
+                        currentPage = (currentPage ? `${currentPage}\n\n` : '') + paragraph;
+                    }
+                });
+
+                if (currentPage) pages.push(currentPage);
+                return pages;
+            }
+
+            function formatStoryText(text) {
+                return text
+                    .split(/\n\s*\n/)
+                    .map(paragraph => `<p>${escapeHTML(paragraph)}</p>`)
+                    .join('');
+            }
+
+            function escapeHTML(str) {
+                return str.replace(/[&<>'"]/g,
+                    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+                );
             }
         });
     </script>

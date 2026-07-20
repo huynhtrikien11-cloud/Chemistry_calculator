@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicVerse - Read and Share Comics</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main styles -->
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+    <!-- Background glowing decorative orbs -->
+    <div class="glow-bg">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <span>ComicVerse</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-btn active">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
+                <a href="upload.html" class="nav-btn nav-btn-primary">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Comic
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Hero Search Section -->
+        <section class="hero">
+            <h1>Read and Share <span>Comics</span> Locally</h1>
+            <p>A fully static, serverless comic platform. Upload comic books as ZIP/CBZ archives or image lists directly in your browser. All your content is stored securely on your device using IndexedDB.</p>
+            
+            <form action="index.html" method="GET" class="search-form" id="search-form">
+                <input type="text" name="search" id="search-input" placeholder="Search by title or author..." class="search-input">
+                <button type="submit" class="search-btn">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                </button>
+            </form>
+        </section>
+
+        <!-- Comics Grid Section -->
+        <section class="container" style="padding: 0;">
+            <h2 id="grid-title" style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Latest Comics</h2>
+            
+            <div class="comics-grid" id="comics-grid">
+                <!-- Loaded dynamically by JavaScript -->
+                <div class="no-comics">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; color: var(--accent-purple); display: block; margin-bottom: 12px;"></i>
+                    <p>Loading database...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Global Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 ComicVerse. Purely client-side application deployed on GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <!-- Database and script -->
+    <script src="static/js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const searchInput = document.getElementById('search-input');
+            const gridTitle = document.getElementById('grid-title');
+            const comicsGrid = document.getElementById('comics-grid');
+
+            // Parse query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search') || '';
+            
+            if (searchParam) {
+                searchInput.value = searchParam;
+                gridTitle.innerText = `Search Results for "${searchParam}"`;
+            }
+
+            try {
+                // Fetch comics from IndexedDB
+                const comics = await ComicDB.getAllComics(searchParam);
+                comicsGrid.innerHTML = ''; // clear loader
+
+                if (comics.length === 0) {
+                    comicsGrid.innerHTML = `
+                        <div class="no-comics">
+                            <i class="fa-regular fa-folder-open"></i>
+                            <p>No comics found.</p>
+                            ${!searchParam ? '<p style="font-size:14px; margin-top:10px;">Be the first to <a href="upload.html" style="color:var(--accent-indigo); font-weight:600; text-decoration:none;">upload a comic!</a></p>' : ''}
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Render each comic card
+                comics.forEach(comic => {
+                    const card = document.createElement('a');
+                    card.href = `comic.html?id=${comic.id}`;
+                    card.className = 'comic-card';
+
+                    // Cover Art Handler
+                    let coverHtml = '';
+                    if (comic.coverBlob) {
+                        const coverUrl = URL.createObjectURL(comic.coverBlob);
+                        coverHtml = `<img src="${coverUrl}" alt="${comic.title}" class="comic-cover" onload="window.URL.revokeObjectURL('${coverUrl}')">`;
+                        // Note: we can revoke the object URL immediately when loaded to prevent memory leaks
+                    } else {
+                        coverHtml = `
+                            <div class="comic-placeholder-cover">
+                                <i class="fa-solid fa-book"></i>
+                                <span>${escapeHTML(comic.title)}</span>
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="comic-cover-wrapper">
+                            ${coverHtml}
+                        </div>
+                        <div class="comic-info">
+                            <h3 class="comic-title">${escapeHTML(comic.title)}</h3>
+                            <p class="comic-author">
+                                <i class="fa-solid fa-user-pen" style="font-size: 11px; margin-right: 4px;"></i>
+                                ${escapeHTML(comic.author || 'Unknown Creator')}
+                            </p>
+                        </div>
+                    `;
+                    comicsGrid.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error(err);
+                comicsGrid.innerHTML = `
+                    <div class="no-comics" style="color:#f87171;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <p>Failed to load database. Please try reloading the page.</p>
+                    </div>
+                `;
+            }
+
+            function escapeHTML(str) {
+                if (!str) return '';
+                return str.replace(/[&<>'"]/g, 
+                    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+                );
+            }
+        });
+    </script>
+</body>
+</html>

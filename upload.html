@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Comic - ComicVerse</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main styles -->
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+    <!-- Background glowing decorative orbs -->
+    <div class="glow-bg">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <span>ComicVerse</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-btn">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
+                <a href="upload.html" class="nav-btn nav-btn-primary active">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Comic
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <div class="upload-card">
+            <h2>Upload Your Comic Book</h2>
+            
+            <form id="upload-form" onsubmit="return false;">
+                <!-- Comic Title -->
+                <div class="form-group">
+                    <label for="title">Comic Title *</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Enter the name of your comic" required>
+                </div>
+                
+                <!-- Author / Creator -->
+                <div class="form-group">
+                    <label for="author">Author / Artist</label>
+                    <input type="text" id="author" name="author" class="form-control" placeholder="Who created this comic? (e.g. Stan Lee)">
+                </div>
+                
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="description">Description / Synopsis</label>
+                    <textarea id="description" name="description" class="form-control" placeholder="Write a short summary about the story, characters, or release notes..."></textarea>
+                </div>
+                
+                <!-- Cover Image Dropzone -->
+                <div class="form-group">
+                    <label>Cover Art / Thumbnail</label>
+                    <div class="dropzone" id="cover-dropzone">
+                        <i class="fa-solid fa-image"></i>
+                        <p>Drag & drop cover art here, or <strong>browse</strong></p>
+                        <span>Supports PNG, JPG, JPEG, WEBP. Max 5MB.</span>
+                        <input type="file" id="cover-input" name="cover" accept="image/*" style="display: none;">
+                    </div>
+                    <div id="cover-preview-container" style="display: none; margin-top: 15px; text-align: center;">
+                        <img id="cover-preview-img" src="" alt="Cover Preview" style="max-height: 200px; border-radius: 8px; border: var(--glass-border); box-shadow: var(--glass-shadow);">
+                        <button type="button" id="remove-cover-btn" class="btn btn-danger" style="display: block; margin: 10px auto 0; padding: 6px 12px; font-size: 13px;">
+                            <i class="fa-solid fa-xmark"></i> Remove Cover
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Upload Method Selector -->
+                <div class="form-group" style="margin-top: 40px;">
+                    <label>How would you like to upload the pages?</label>
+                    <div class="upload-method-selector">
+                        <div class="method-tab active" id="tab-images">
+                            <i class="fa-solid fa-images"></i> Multiple Images
+                        </div>
+                        <div class="method-tab" id="tab-archive">
+                            <i class="fa-solid fa-file-zipper"></i> ZIP / CBZ Archive
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Option 1: Multiple Pages (Images) Dropzone -->
+                <div class="form-group" id="group-images-upload">
+                    <label>Comic Pages *</label>
+                    <div class="dropzone" id="pages-dropzone">
+                        <i class="fa-solid fa-images" style="color: var(--accent-purple);"></i>
+                        <p>Drag & drop all page images here, or <strong>browse</strong></p>
+                        <span>Select multiple images. Pages will be sorted alphabetically/numerically by filename.</span>
+                        <input type="file" id="pages-input" name="pages" accept="image/*" multiple style="display: none;">
+                    </div>
+                    <div id="pages-preview-list" class="file-list-preview" style="display: none;"></div>
+                </div>
+                
+                <!-- Option 2: Archive Dropzone -->
+                <div class="form-group" id="group-archive-upload" style="display: none;">
+                    <label>Comic Archive (ZIP / CBZ) *</label>
+                    <div class="dropzone" id="archive-dropzone">
+                        <i class="fa-solid fa-file-zipper" style="color: var(--accent-pink);"></i>
+                        <p>Drag & drop your comic archive here, or <strong>browse</strong></p>
+                        <span>Supports .zip or .cbz file extensions. Recommended for pre-sequenced chapters.</span>
+                        <input type="file" id="archive-input" name="archive" accept=".zip,.cbz" style="display: none;">
+                    </div>
+                    <div id="archive-preview-list" class="file-list-preview" style="display: none;"></div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div style="margin-top: 40px; text-align: center;">
+                    <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; max-width: 300px; padding: 14px 28px; font-size: 16px;">
+                        <i class="fa-solid fa-circle-check"></i> Upload and Publish
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Uploading Loading Modal Overlay -->
+    <div id="upload-loading-overlay" style="display: none; position: fixed; inset: 0; background: rgba(5,6,10,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; flex-direction: column;">
+        <div style="background: var(--bg-card); border: var(--glass-border); padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; box-shadow: var(--glass-shadow); display: flex; flex-direction: column; align-items: center; gap: 20px;">
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 48px; color: var(--accent-purple);"></i>
+            <h3 id="loading-title" style="font-size: 20px; font-weight: 700;">Processing Comic Files...</h3>
+            <p id="loading-description" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Extracting pages, naturally ordering images, and saving to IndexedDB browser storage. Please do not refresh this page.</p>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 ComicVerse. Purely client-side application deployed on GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <!-- JSZip Library CDN (Required for ZIP/CBZ processing) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Database Interface -->
+    <script src="static/js/db.js"></script>
+    <!-- Main JS file containing the upload logic -->
+    <script src="static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading - ComicVerse</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main styles -->
+    <link rel="stylesheet" href="static/css/styles.css">
+    <style>
+        body.reader-body {
+            background-color: #05060a !important;
+            display: block !important;
+            min-height: 100vh;
+        }
+        #reader-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            min-height: 100vh;
+            color: var(--text-secondary);
+        }
+        #reader-main-view {
+            display: none;
+        }
+    </style>
+</head>
+<body class="reader-body">
+
+    <!-- Loading Panel -->
+    <div id="reader-loading">
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 48px; color: var(--accent-purple); margin-bottom: 16px;"></i>
+        <p>Loading reader canvas...</p>
+    </div>
+
+    <!-- Main Reader View (Initially Hidden) -->
+    <div id="reader-main-view">
+        <!-- Top Navigation -->
+        <header class="reader-header">
+            <div class="reader-nav">
+                <a href="#" id="back-link" class="reader-title">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span id="comic-title" class="comic-name-text">Comic Title</span>
+                </a>
+                
+                <div class="reader-controls">
+                    <button class="reader-btn active" id="btn-scroll-mode" title="Webtoon Scroll Mode">
+                        <i class="fa-solid fa-arrows-up-down"></i> Scroll
+                    </button>
+                    <button class="reader-btn" id="btn-slide-mode" title="Page Slider Mode">
+                        <i class="fa-solid fa-file-image"></i> Page-by-Page
+                    </button>
+                    <button class="reader-btn" id="btn-fullscreen" title="Toggle Fullscreen">
+                        <i class="fa-solid fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Reading Progress Bar -->
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+
+        <!-- Mode 1: Webtoon Vertical Scroll Mode -->
+        <div class="scroll-container" id="scroll-reader-view">
+            <!-- Rendered dynamically by JavaScript -->
+        </div>
+
+        <!-- Mode 2: Page-by-Page Slider Mode -->
+        <div class="slider-container" id="slider-reader-view">
+            <div class="slider-stage">
+                <img id="slider-image-element" src="" alt="Comic Page" class="slider-image">
+                
+                <button class="slider-nav slider-nav-prev" id="slider-prev-btn" title="Previous Page">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="slider-nav slider-nav-next" id="slider-next-btn" title="Next Page">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <div class="reader-footer-nav" id="slider-footer-controls" style="display: flex;">
+                <button class="reader-btn" id="footer-prev-btn"><i class="fa-solid fa-angle-left"></i> Prev</button>
+                <span id="page-indicator" style="font-weight: 600; color: var(--text-primary);">Page 1 of 1</span>
+                <button class="reader-btn" id="footer-next-btn">Next <i class="fa-solid fa-angle-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="static/js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingPanel = document.getElementById('reader-loading');
+            const mainView = document.getElementById('reader-main-view');
+            const backLink = document.getElementById('back-link');
+            const comicTitleEl = document.getElementById('comic-title');
+            
+            const scrollReaderView = document.getElementById('scroll-reader-view');
+            const sliderReaderView = document.getElementById('slider-reader-view');
+            const btnScrollMode = document.getElementById('btn-scroll-mode');
+            const btnSlideMode = document.getElementById('btn-slide-mode');
+            const btnFullscreen = document.getElementById('btn-fullscreen');
+            
+            const sliderImg = document.getElementById('slider-image-element');
+            const pageIndicator = document.getElementById('page-indicator');
+            const progressFill = document.getElementById('progress-fill');
+            
+            const btnPrev = document.getElementById('slider-prev-btn');
+            const btnNext = document.getElementById('slider-next-btn');
+            const ftrPrev = document.getElementById('footer-prev-btn');
+            const ftrNext = document.getElementById('footer-next-btn');
+
+            // Parse parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const comicId = urlParams.get('id');
+
+            if (!comicId) {
+                loadingPanel.innerHTML = '<p style="color:#f87171;">Error: No Comic ID specified.</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Return Home</a>';
+                return;
+            }
+
+            // Set back button link
+            backLink.href = `comic.html?id=${comicId}`;
+
+            try {
+                // Fetch data
+                const comic = await ComicDB.getComic(comicId);
+                if (!comic) {
+                    loadingPanel.innerHTML = '<p style="color:#f87171;">Error: Comic not found.</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Return Home</a>';
+                    return;
+                }
+
+                const pages = await ComicDB.getComicPages(comicId);
+                if (pages.length === 0) {
+                    loadingPanel.innerHTML = '<p style="color:#f87171;">Error: Comic contains no pages.</p><a href="comic.html?id=' + comicId + '" class="btn btn-primary" style="margin-top:15px;">Go Back</a>';
+                    return;
+                }
+
+                // Populate title
+                comicTitleEl.innerText = comic.title;
+                document.title = `Reading: ${comic.title} - ComicVerse`;
+
+                // Cache page URLs
+                const pageUrls = pages.map(p => ({
+                    number: p.pageNumber,
+                    url: URL.createObjectURL(p.pageBlob)
+                }));
+
+                // Populate Scroll Mode Container
+                pageUrls.forEach(p => {
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'scroll-page';
+                    pageDiv.setAttribute('data-page', p.number);
+                    pageDiv.innerHTML = `<img src="${p.url}" alt="Page ${p.number}" loading="lazy">`;
+                    scrollReaderView.appendChild(pageDiv);
+                });
+
+                // Hide loading, show main viewer
+                loadingPanel.style.display = 'none';
+                mainView.style.display = 'block';
+
+                // Slider navigation variables
+                let currentMode = 'scroll';
+                let currentPageIndex = 0;
+
+                // Load progress
+                const savedMode = localStorage.getItem(`comic_mode_${comicId}`);
+                const savedPage = localStorage.getItem(`comic_page_${comicId}`);
+                
+                if (savedPage) {
+                    currentPageIndex = Math.max(0, Math.min(parseInt(savedPage) - 1, pageUrls.length - 1));
+                }
+
+                if (savedMode === 'slide') {
+                    setMode('slide');
+                } else {
+                    setMode('scroll');
+                    if (savedPage && parseInt(savedPage) > 1) {
+                        setTimeout(() => {
+                            const targetPageEl = document.querySelector(`.scroll-page[data-page="${savedPage}"]`);
+                            if (targetPageEl) {
+                                targetPageEl.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }, 200);
+                    }
+                }
+
+                // Mode Selector
+                function setMode(mode) {
+                    currentMode = mode;
+                    localStorage.setItem(`comic_mode_${comicId}`, mode);
+                    
+                    if (mode === 'scroll') {
+                        scrollReaderView.style.display = 'flex';
+                        sliderReaderView.style.display = 'none';
+                        btnScrollMode.classList.add('active');
+                        btnSlideMode.classList.remove('active');
+                        updateProgress();
+                    } else {
+                        scrollReaderView.style.display = 'none';
+                        sliderReaderView.style.display = 'flex';
+                        btnScrollMode.classList.remove('active');
+                        btnSlideMode.classList.add('active');
+                        renderSlidePage();
+                    }
+                }
+
+                // Render Slide page
+                function renderSlidePage() {
+                    const page = pageUrls[currentPageIndex];
+                    sliderImg.src = page.url;
+                    pageIndicator.innerText = `Page ${page.number} of ${pageUrls.length}`;
+                    localStorage.setItem(`comic_page_${comicId}`, page.number);
+                    updateProgress();
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                }
+
+                // Progress Bar Handler
+                function updateProgress() {
+                    let percentage = 0;
+                    if (currentMode === 'scroll') {
+                        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                        if (scrollHeight > 0) {
+                            percentage = (window.scrollY / scrollHeight) * 100;
+                        }
+                    } else {
+                        percentage = ((currentPageIndex + 1) / pageUrls.length) * 100;
+                    }
+                    progressFill.style.width = `${percentage}%`;
+                }
+
+                // Slide actions
+                function nextPage() {
+                    if (currentPageIndex < pageUrls.length - 1) {
+                        currentPageIndex++;
+                        renderSlidePage();
+                    }
+                }
+
+                function prevPage() {
+                    if (currentPageIndex > 0) {
+                        currentPageIndex--;
+                        renderSlidePage();
+                    }
+                }
+
+                // Navigation Listeners
+                btnNext.addEventListener('click', nextPage);
+                btnPrev.addEventListener('click', prevPage);
+                ftrNext.addEventListener('click', nextPage);
+                ftrPrev.addEventListener('click', prevPage);
+
+                // Image clicks (Left side vs Right side)
+                sliderImg.addEventListener('click', (e) => {
+                    const rect = sliderImg.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    if (x > rect.width / 2) {
+                        nextPage();
+                    } else {
+                        prevPage();
+                    }
+                });
+
+                // Keyboard listener
+                document.addEventListener('keydown', (e) => {
+                    if (currentMode === 'slide') {
+                        if (e.key === 'ArrowRight' || e.key === ' ') {
+                            e.preventDefault();
+                            nextPage();
+                        } else if (e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            prevPage();
+                        }
+                    }
+                });
+
+                // Scroll events
+                window.addEventListener('scroll', () => {
+                    if (currentMode === 'scroll') {
+                        updateProgress();
+                        
+                        // Save last scrolled page
+                        const pageElements = document.querySelectorAll('.scroll-page');
+                        let visiblePage = 1;
+                        for (let el of pageElements) {
+                            const rect = el.getBoundingClientRect();
+                            if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
+                                visiblePage = el.getAttribute('data-page');
+                                break;
+                            }
+                        }
+                        localStorage.setItem(`comic_page_${comicId}`, visiblePage);
+                    }
+                });
+
+                // Fullscreen Logic
+                function toggleFullscreen() {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(err => {
+                            console.error(`Fullscreen failed: ${err.message}`);
+                        });
+                        btnFullscreen.innerHTML = '<i class="fa-solid fa-compress"></i>';
+                    } else {
+                        document.exitFullscreen();
+                        btnFullscreen.innerHTML = '<i class="fa-solid fa-expand"></i>';
+                    }
+                }
+                btnFullscreen.addEventListener('click', toggleFullscreen);
+
+                // Bind mode toggles
+                btnScrollMode.addEventListener('click', () => setMode('scroll'));
+                btnSlideMode.addEventListener('click', () => setMode('slide'));
+
+                // Clean up Blob URLs on page unload to free memory
+                window.addEventListener('beforeunload', () => {
+                    pageUrls.forEach(p => URL.revokeObjectURL(p.url));
+                });
+
+            } catch (err) {
+                console.error(err);
+                loadingPanel.innerHTML = '<p style="color:#f87171;">Failed to load reader: ' + err.message + '</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Return Home</a>';
+            }
+        });
+    </script>
+</body>
+</html>

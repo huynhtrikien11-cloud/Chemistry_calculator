@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comic Details - ComicVerse</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main styles -->
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+    <!-- Background glowing decorative orbs -->
+    <div class="glow-bg">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <span>ComicVerse</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-btn">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
+                <a href="upload.html" class="nav-btn nav-btn-primary">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Comic
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container" id="detail-container">
+        <!-- Loading spinner -->
+        <div class="no-comics" style="padding: 100px 0;">
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 48px; color: var(--accent-purple); display: block; margin-bottom: 15px;"></i>
+            <p>Loading comic details...</p>
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 ComicVerse. Purely client-side application deployed on GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="static/js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('detail-container');
+
+            // Parse comic ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const comicId = urlParams.get('id');
+
+            if (!comicId) {
+                renderError('No comic ID specified. Please return to the homepage.');
+                return;
+            }
+
+            try {
+                // Fetch comic and pages from database
+                const comic = await ComicDB.getComic(comicId);
+                if (!comic) {
+                    renderError('Comic not found! It may have been deleted.');
+                    return;
+                }
+
+                const pages = await ComicDB.getComicPages(comicId);
+
+                // Set page title
+                document.title = `${comic.title} - ComicVerse`;
+
+                // Set cover image
+                let coverHtml = '';
+                if (comic.coverBlob) {
+                    const coverUrl = URL.createObjectURL(comic.coverBlob);
+                    coverHtml = `<img src="${coverUrl}" alt="${escapeHTML(comic.title)}" class="detail-cover">`;
+                } else {
+                    coverHtml = `
+                        <div class="comic-placeholder-cover" style="height: 450px; border-radius: 16px;">
+                            <i class="fa-solid fa-book" style="font-size: 64px;"></i>
+                            <span style="font-size: 20px; margin-top: 15px;">${escapeHTML(comic.title)}</span>
+                        </div>
+                    `;
+                }
+
+                // Page previews layout
+                let pagesHtml = '';
+                pages.forEach(page => {
+                    const pageUrl = URL.createObjectURL(page.pageBlob);
+                    pagesHtml += `
+                        <div class="page-thumbnail-card">
+                            <img src="${pageUrl}" alt="Page ${page.pageNumber}" class="page-thumbnail" loading="lazy" onload="window.URL.revokeObjectURL('${pageUrl}')">
+                            <div class="page-number-badge">${page.pageNumber}</div>
+                        </div>
+                    `;
+                });
+
+                // Set detail contents
+                container.innerHTML = `
+                    <div class="detail-layout">
+                        <!-- Sidebar: Cover & Actions -->
+                        <div class="detail-sidebar">
+                            ${coverHtml}
+                            <div class="detail-actions">
+                                <a href="reader.html?id=${comic.id}" class="btn btn-primary" style="flex: 1;">
+                                    <i class="fa-solid fa-play"></i> Read Now
+                                </a>
+                                <button id="delete-btn" class="btn btn-danger" title="Delete Comic">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Main Info -->
+                        <div class="detail-main">
+                            <h1 class="detail-title">${escapeHTML(comic.title)}</h1>
+                            <p class="detail-author">
+                                <i class="fa-solid fa-user-pen" style="margin-right: 6px;"></i>
+                                Created by ${escapeHTML(comic.author || 'Unknown Artist')}
+                            </p>
+                            
+                            <h2 class="detail-desc-title">Description</h2>
+                            <p class="detail-desc">${escapeHTML(comic.description) || 'No description provided.'}</p>
+                            
+                            <h2 class="detail-desc-title" style="margin-bottom: 20px;">Pages Preview (${pages.length} pages)</h2>
+                            <div class="pages-preview-grid">
+                                ${pagesHtml || '<p style="color:var(--text-muted);">No pages found.</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Hook up delete listener
+                const deleteBtn = document.getElementById('delete-btn');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', async () => {
+                        const confirmed = confirm('Are you sure you want to delete this comic and all of its pages? This action cannot be undone.');
+                        if (confirmed) {
+                            try {
+                                await ComicDB.deleteComic(comicId);
+                                alert('Comic deleted successfully!');
+                                window.location.href = 'index.html';
+                            } catch (err) {
+                                console.error(err);
+                                alert('Error deleting comic: ' + err.message);
+                            }
+                        }
+                    });
+                }
+
+            } catch (err) {
+                console.error(err);
+                renderError('An error occurred while loading the comic: ' + err.message);
+            }
+
+            function renderError(message) {
+                container.innerHTML = `
+                    <div class="no-comics" style="padding: 100px 0; color:#f87171;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size:48px; margin-bottom:15px; display:block;"></i>
+                        <p>${escapeHTML(message)}</p>
+                        <a href="index.html" class="btn btn-primary" style="margin-top:20px;">
+                            <i class="fa-solid fa-house"></i> Return Home
+                        </a>
+                    </div>
+                `;
+            }
+
+            function escapeHTML(str) {
+                if (!str) return '';
+                return str.replace(/[&<>'"]/g, 
+                    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+                );
+            }
+        });
+    </script>
+</body>
+</html>

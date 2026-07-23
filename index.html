@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChemPhys & MadChaosIdea - Kho Lưu Trữ Ý Tưởng Khoa Học & Siêu Táo Bạo</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main styles -->
@@ -217,7 +221,7 @@
                             <div class="comic-info">
                                 ${badgeHtml}
                                 <h3 class="comic-title" title="${escapeHTML(item.title)}">${escapeHTML(item.title)}</h3>
-                                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4;">${escapeHTML(shortSummary)}</p>
+                                <p class="comic-desc" title="${escapeHTML(summary)}">${escapeHTML(shortSummary)}</p>
                                 <p class="comic-author">
                                     <i class="fa-solid fa-user-gear" style="font-size: 11px; margin-right: 4px;"></i>
                                     ${escapeHTML(item.author || 'Tác giả Ẩn danh')}

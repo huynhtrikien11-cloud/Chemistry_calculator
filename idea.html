@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Ý Tưởng / Spec Details - ChemPhys & MadChaosIdea</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main styles -->
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+    <!-- Background glowing decorative orbs -->
+    <div class="glow-bg">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-atom"></i>
+                <span>ChemPhys & MadChaosIdea</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-btn">
+                    <i class="fa-solid fa-house"></i> Kho Ý Tưởng (Vault)
+                </a>
+                <a href="upload.html" class="nav-btn nav-btn-primary">
+                    <i class="fa-solid fa-flask-vial"></i> Đăng Ý Tưởng / Submit Idea
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container" id="detail-container">
+        <!-- Loading spinner -->
+        <div class="no-comics" style="padding: 100px 0;">
+            <i class="fa-solid fa-atom fa-spin" style="font-size: 48px; color: var(--accent-cyan); display: block; margin-bottom: 15px;"></i>
+            <p>Đang tải dữ liệu ý tưởng từ Kho Vault... / Loading spec details...</p>
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 ChemPhys & MadChaosIdea. Nền tảng lưu trữ ý tưởng đột phá dành cho người Việt & Thế giới.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="static/js/stories.js"></script>
+    <script src="static/js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('detail-container');
+
+            // Parse ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const comicId = urlParams.get('id');
+
+            if (!comicId) {
+                renderError('Không tìm thấy ID ý tưởng. Vui lòng quay lại trang chủ Kho Vault.');
+                return;
+            }
+
+            try {
+                const dbHandler = window.IdeaDB || window.ComicDB;
+                const staticStoryId = comicId.startsWith('static-') ? comicId.replace('static-', '') : '';
+                const item = staticStoryId
+                    ? (window.StaticStories || []).find(story => story.id === staticStoryId)
+                    : await dbHandler.getComic(comicId);
+                
+                if (!item) {
+                    renderError('Ý tưởng / Đột phá này không tồn tại hoặc đã bị xóa!');
+                    return;
+                }
+
+                const pages = staticStoryId ? [] : await dbHandler.getComicPages(comicId);
+                const storyPageCount = paginateStoryText(item.storyText || '').length;
+
+                // Set page title
+                document.title = `${item.title} - ChemPhys & MadChaosIdea`;
+
+                // Badge styling with Vietnamese support
+                const category = item.category || 'Mad Chaos Ideas';
+                let badgeHtml = '';
+                let placeholderIcon = 'fa-lightbulb';
+                if (category.includes('Chem') || category.includes('Hóa')) {
+                    badgeHtml = `<span class="badge-category badge-chemistry"><i class="fa-solid fa-flask"></i> Hóa Học / Chemistry</span>`;
+                    placeholderIcon = 'fa-flask';
+                } else if (category.includes('Phys') || category.includes('Vật Lý')) {
+                    badgeHtml = `<span class="badge-category badge-physics"><i class="fa-solid fa-bolt"></i> Vật Lý / Physics</span>`;
+                    placeholderIcon = 'fa-atom';
+                } else if (category.includes('Weapon') || category.includes('Vũ Khí')) {
+                    badgeHtml = `<span class="badge-category badge-weapon"><i class="fa-solid fa-explosion"></i> Vũ Khí Điên Rồ / Chaos Weapon</span>`;
+                    placeholderIcon = 'fa-explosion';
+                } else if (category.includes('Cure') || category.includes('Medic') || category.includes('Chữa')) {
+                    badgeHtml = `<span class="badge-category badge-cure"><i class="fa-solid fa-dna"></i> Chữa Bệnh / Cure & Medical</span>`;
+                    placeholderIcon = 'fa-dna';
+                } else {
+                    badgeHtml = `<span class="badge-category badge-wild"><i class="fa-solid fa-brain"></i> Ý Tưởng Điên Rồ / Wild Idea</span>`;
+                    placeholderIcon = 'fa-brain';
+                }
+
+                // Set cover image
+                let coverHtml = '';
+                if (item.coverBlob) {
+                    const coverUrl = URL.createObjectURL(item.coverBlob);
+                    coverHtml = `<img src="${coverUrl}" alt="${escapeHTML(item.title)}" class="detail-cover">`;
+                } else {
+                    coverHtml = `
+                        <div class="comic-placeholder-cover" style="height: 420px; border-radius: 16px;">
+                            <i class="fa-solid ${placeholderIcon}" style="font-size: 64px; color: var(--accent-cyan);"></i>
+                            <span style="font-size: 20px; margin-top: 15px; font-weight:700; color: var(--text-primary); text-align:center;">${escapeHTML(item.title)}</span>
+                        </div>
+                    `;
+                }
+
+                // Page previews layout
+                let pagesHtml = '';
+                if (storyPageCount > 0) {
+                    pagesHtml = `
+                        <div class="story-preview-card">
+                            <i class="fa-solid fa-file-lines" style="color:var(--accent-cyan);"></i>
+                            <span>${storyPageCount} Trang Văn Bản Bài Viết</span>
+                        </div>
+                    `;
+                } else if (pages.length > 0) {
+                    pages.forEach(page => {
+                        const pageUrl = URL.createObjectURL(page.pageBlob);
+                        pagesHtml += `
+                            <div class="page-thumbnail-card">
+                                <img src="${pageUrl}" alt="Sơ đồ ${page.pageNumber}" class="page-thumbnail" loading="lazy" onload="window.URL.revokeObjectURL('${pageUrl}')">
+                                <div class="page-number-badge">Sơ đồ ${page.pageNumber}</div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Set detail contents
+                container.innerHTML = `
+                    <div class="detail-layout">
+                        <!-- Sidebar: Cover & Actions -->
+                        <div class="detail-sidebar">
+                            ${coverHtml}
+                            <div class="detail-actions">
+                                <a href="viewer.html?id=${staticStoryId ? `static-${item.id}` : item.id}" class="btn btn-primary" style="flex: 1; padding: 14px 20px;">
+                                    <i class="fa-solid fa-book-open-reader"></i> Xem Chi Tiết / Read Spec
+                                </a>
+                                <button id="delete-btn" class="btn btn-danger" title="Xóa Ý Tưởng" ${staticStoryId ? 'style="display:none;"' : ''}>
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Main Info -->
+                        <div class="detail-main">
+                            ${badgeHtml}
+                            <h1 class="detail-title" style="margin-top: 6px;">${escapeHTML(item.title)}</h1>
+                            <p class="detail-author" style="display:flex; align-items:center; gap:8px;">
+                                <i class="fa-solid fa-user-gear"></i>
+                                Tác giả / Nhà sáng tạo: <strong>${escapeHTML(item.author || 'Tác giả Ẩn danh')}</strong>
+                            </p>
+                            
+                            <h2 class="detail-desc-title">Tóm Tắt Ý Tưởng (Abstract)</h2>
+                            <p class="detail-desc">${escapeHTML(item.description || item.summary) || 'Không có tóm tắt chi tiết.'}</p>
+                            
+                            <h2 class="detail-desc-title" style="margin-bottom: 20px;">
+                                Nội Dung Chi Tiết (${storyPageCount ? `${storyPageCount} Phần Văn Bản` : `${pages.length} Sơ Đồ Thiết Kế`})
+                            </h2>
+                            <div class="pages-preview-grid">
+                                ${pagesHtml || '<p style="color:var(--text-muted);">Không có tệp sơ đồ đi kèm.</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Hook up delete listener
+                const deleteBtn = document.getElementById('delete-btn');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', async () => {
+                        const confirmed = confirm('Bạn có chắc chắn muốn xóa ý tưởng này cùng toàn bộ sơ đồ đi kèm? Thao tác này không thể hoàn tác.');
+                        if (confirmed) {
+                            try {
+                                await dbHandler.deleteComic(comicId);
+                                alert('Đã xóa ý tưởng thành công khỏi Kho Vault!');
+                                window.location.href = 'index.html';
+                            } catch (err) {
+                                console.error(err);
+                                alert('Lỗi khi xóa ý tưởng: ' + err.message);
+                            }
+                        }
+                    });
+                }
+
+            } catch (err) {
+                console.error(err);
+                renderError('Đã xảy ra lỗi khi tải ý tưởng: ' + err.message);
+            }
+
+            function renderError(message) {
+                container.innerHTML = `
+                    <div class="no-comics" style="padding: 100px 0; color:#f87171;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size:48px; margin-bottom:15px; display:block;"></i>
+                        <p>${escapeHTML(message)}</p>
+                        <a href="index.html" class="btn btn-primary" style="margin-top:20px;">
+                            <i class="fa-solid fa-house"></i> Quay lại Trang Chủ Vault
+                        </a>
+                    </div>
+                `;
+            }
+
+            function escapeHTML(str) {
+                if (!str) return '';
+                return str.replace(/[&<>'"]/g, 
+                    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+                );
+            }
+
+            function paginateStoryText(text) {
+                const normalized = text.trim().replace(/\r\n/g, '\n');
+                if (!normalized) return [];
+
+                const paragraphs = normalized.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean);
+                const pages = [];
+                let currentPage = '';
+                const maxChars = 1100;
+
+                paragraphs.forEach(paragraph => {
+                    if ((currentPage + '\n\n' + paragraph).trim().length > maxChars && currentPage) {
+                        pages.push(currentPage);
+                        currentPage = paragraph;
+                    } else {
+                        currentPage = (currentPage ? `${currentPage}\n\n` : '') + paragraph;
+                    }
+                });
+
+                if (currentPage) pages.push(currentPage);
+                return pages;
+            }
+        });
+    </script>
+</body>
+</html>

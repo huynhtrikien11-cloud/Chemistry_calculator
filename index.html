@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComicVerse - Read and Share Comics</title>
+    <title>ChemPhys & MadChaosIdea - Kho Lưu Trữ Ý Tưởng Khoa Học & Siêu Táo Bạo</title>
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main styles -->
@@ -20,15 +20,15 @@
     <header>
         <div class="container navbar">
             <a href="index.html" class="logo">
-                <i class="fa-solid fa-book-open-reader"></i>
-                <span>ComicVerse</span>
+                <i class="fa-solid fa-atom"></i>
+                <span>ChemPhys & MadChaosIdea</span>
             </a>
             <nav class="nav-links">
                 <a href="index.html" class="nav-btn active">
-                    <i class="fa-solid fa-house"></i> Home
+                    <i class="fa-solid fa-house"></i> Kho Vault
                 </a>
                 <a href="upload.html" class="nav-btn nav-btn-primary">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Comic
+                    <i class="fa-solid fa-flask-vial"></i> Đăng Ý Tưởng / Upload Spec
                 </a>
             </nav>
         </div>
@@ -38,26 +38,50 @@
     <main class="container">
         <!-- Hero Search Section -->
         <section class="hero">
-            <h1>Read <span>Story Comics</span> Online</h1>
-            <p>Read text-based comic stories page by page, or upload your own comic images and chapters directly in the browser.</p>
+            <h1>Khám Phá & Đăng Tải <span>Ý Tưởng Khoa Học Điên Rồ</span></h1>
+            <p>Nền tảng dành cho Hóa Học, Vật Lý Lý Thuyết, Vũ Khí Siêu Táo Bạo, Liệu Pháp Chữa Ung Thư & Mọi Ý Tưởng Bất Tận Từ Trí Tuệ Việt & Thế Giới.</p>
             
             <form action="index.html" method="GET" class="search-form" id="search-form">
-                <input type="text" name="search" id="search-input" placeholder="Search by title or author..." class="search-input">
+                <input type="text" name="search" id="search-input" placeholder="Tìm kiếm tên ý tưởng, tác giả, hóa học, chữa ung thư, vũ khí..." class="search-input">
                 <button type="submit" class="search-btn">
-                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                    <i class="fa-solid fa-magnifying-glass"></i> Tìm Kiếm
                 </button>
             </form>
+
+            <!-- Category Filter Pills -->
+            <div class="category-filter-bar" id="category-filter-bar">
+                <button class="cat-pill active" data-category="all">
+                    <i class="fa-solid fa-layer-group"></i> Tất Cả Ý Tưởng
+                </button>
+                <button class="cat-pill" data-category="Chemistry">
+                    <i class="fa-solid fa-flask"></i> 🧪 Hóa Học
+                </button>
+                <button class="cat-pill" data-category="Physics">
+                    <i class="fa-solid fa-bolt"></i> ⚡ Vật Lý
+                </button>
+                <button class="cat-pill" data-category="Mad Chaos Weapons">
+                    <i class="fa-solid fa-explosion"></i> 💥 Vũ Khí Điên Rồ
+                </button>
+                <button class="cat-pill" data-category="Cures & Medical">
+                    <i class="fa-solid fa-dna"></i> 🧬 Chữa Bệnh & Y Học
+                </button>
+                <button class="cat-pill" data-category="Wild Thoughts">
+                    <i class="fa-solid fa-brain"></i> 🧠 Ý Tưởng Siêu Đột Phá
+                </button>
+            </div>
         </section>
 
-        <!-- Comics Grid Section -->
+        <!-- Ideas Grid Section -->
         <section class="container" style="padding: 0;">
-            <h2 id="grid-title" style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Latest Comics</h2>
+            <h2 id="grid-title" style="font-size: 24px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-microscope" style="color: var(--accent-cyan);"></i> Các Ý Tưởng & Đột Phá Mới Nhất
+            </h2>
             
             <div class="comics-grid" id="comics-grid">
                 <!-- Loaded dynamically by JavaScript -->
                 <div class="no-comics">
-                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; color: var(--accent-purple); display: block; margin-bottom: 12px;"></i>
-                    <p>Loading database...</p>
+                    <i class="fa-solid fa-atom fa-spin" style="font-size: 40px; color: var(--accent-cyan); display: block; margin-bottom: 14px;"></i>
+                    <p>Đang truy cập Kho Dữ Liệu Vault...</p>
                 </div>
             </div>
         </section>
@@ -66,7 +90,7 @@
     <!-- Global Footer -->
     <footer>
         <div class="container">
-            <p>&copy; 2026 ComicVerse. Purely client-side application deployed on GitHub Pages.</p>
+            <p>&copy; 2026 ChemPhys & MadChaosIdea. Kho lưu trữ ý tưởng dành cho người Việt và những nhà sáng tạo toàn cầu. 🇻🇳</p>
         </div>
     </footer>
 
@@ -78,84 +102,140 @@
             const searchInput = document.getElementById('search-input');
             const gridTitle = document.getElementById('grid-title');
             const comicsGrid = document.getElementById('comics-grid');
+            const categoryPills = document.querySelectorAll('.cat-pill');
 
             // Parse query parameters
             const urlParams = new URLSearchParams(window.location.search);
             const searchParam = urlParams.get('search') || '';
-            
+            let activeCategory = urlParams.get('category') || 'all';
+
             if (searchParam) {
                 searchInput.value = searchParam;
-                gridTitle.innerText = `Search Results for "${searchParam}"`;
             }
 
-            try {
-                // Fetch comics from IndexedDB
-                const savedComics = await ComicDB.getAllComics(searchParam);
-                const query = searchParam.toLowerCase().trim();
-                const staticComics = (window.StaticStories || []).filter(comic => {
-                    if (!query) return true;
-                    return comic.title.toLowerCase().includes(query) || comic.author.toLowerCase().includes(query);
-                });
-                const comics = [...staticComics, ...savedComics];
-                comicsGrid.innerHTML = ''; // clear loader
-
-                if (comics.length === 0) {
-                    comicsGrid.innerHTML = `
-                        <div class="no-comics">
-                            <i class="fa-regular fa-folder-open"></i>
-                            <p>No comics found.</p>
-                            ${!searchParam ? '<p style="font-size:14px; margin-top:10px;">Be the first to <a href="upload.html" style="color:var(--accent-indigo); font-weight:600; text-decoration:none;">upload a comic!</a></p>' : ''}
-                        </div>
-                    `;
-                    return;
+            categoryPills.forEach(pill => {
+                if (pill.getAttribute('data-category').toLowerCase() === activeCategory.toLowerCase()) {
+                    pill.classList.add('active');
+                } else {
+                    pill.classList.remove('active');
                 }
 
-                // Render each comic card
-                comics.forEach(comic => {
-                    const card = document.createElement('a');
-                    card.href = comic.storyText && String(comic.id).includes('-')
-                        ? `comic.html?id=static-${comic.id}`
-                        : `comic.html?id=${comic.id}`;
-                    card.className = 'comic-card';
+                pill.addEventListener('click', () => {
+                    categoryPills.forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeCategory = pill.getAttribute('data-category');
+                    renderGrid();
+                });
+            });
 
-                    // Cover Art Handler
-                    let coverHtml = '';
-                    if (comic.coverBlob) {
-                        const coverUrl = URL.createObjectURL(comic.coverBlob);
-                        coverHtml = `<img src="${coverUrl}" alt="${comic.title}" class="comic-cover" onload="window.URL.revokeObjectURL('${coverUrl}')">`;
-                        // Note: we can revoke the object URL immediately when loaded to prevent memory leaks
+            async function renderGrid() {
+                try {
+                    const query = (searchInput.value || '').toLowerCase().trim();
+                    
+                    const savedIdeas = await IdeaDB.getAllComics(query, activeCategory);
+
+                    const staticIdeas = (window.StaticStories || []).filter(item => {
+                        const matchesCategory = activeCategory === 'all' || 
+                            (item.category && item.category.toLowerCase().includes(activeCategory.toLowerCase())) ||
+                            (activeCategory.toLowerCase().includes(item.category ? item.category.toLowerCase() : ''));
+                        
+                        if (!matchesCategory) return false;
+
+                        if (!query) return true;
+                        return (item.title && item.title.toLowerCase().includes(query)) ||
+                               (item.author && item.author.toLowerCase().includes(query)) ||
+                               (item.description && item.description.toLowerCase().includes(query));
+                    });
+
+                    const allItems = [...savedIdeas, ...staticIdeas];
+                    comicsGrid.innerHTML = '';
+
+                    if (searchParam || activeCategory !== 'all') {
+                        gridTitle.innerHTML = `<i class="fa-solid fa-filter" style="color:var(--accent-cyan);"></i> Kết Quả Lọc (${allItems.length})`;
                     } else {
-                        coverHtml = `
-                            <div class="comic-placeholder-cover">
-                                <i class="fa-solid fa-book"></i>
-                                <span>${escapeHTML(comic.title)}</span>
-                            </div>
-                        `;
+                        gridTitle.innerHTML = `<i class="fa-solid fa-microscope" style="color:var(--accent-cyan);"></i> Các Ý Tưởng & Đột Phá Mới Nhất (${allItems.length})`;
                     }
 
-                    card.innerHTML = `
-                        <div class="comic-cover-wrapper">
-                            ${coverHtml}
-                        </div>
-                        <div class="comic-info">
-                            <h3 class="comic-title">${escapeHTML(comic.title)}</h3>
-                            <p class="comic-author">
-                                <i class="fa-solid fa-user-pen" style="font-size: 11px; margin-right: 4px;"></i>
-                                ${escapeHTML(comic.author || 'Unknown Creator')}
-                            </p>
+                    if (allItems.length === 0) {
+                        comicsGrid.innerHTML = `
+                            <div class="no-comics">
+                                <i class="fa-solid fa-vial-circle-check"></i>
+                                <p>Chưa có ý tưởng nào trong danh mục này.</p>
+                                <p style="font-size:14px; margin-top:10px;">Hãy là người đầu tiên <a href="upload.html" style="color:var(--accent-cyan); font-weight:600; text-decoration:none;">đăng tải ý tưởng đột phá!</a></p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // Render card pointing to idea.html
+                    allItems.forEach(item => {
+                        const card = document.createElement('a');
+                        const isStatic = item.storyText && String(item.id).includes('-') && !Number.isInteger(Number(item.id));
+                        card.href = isStatic ? `idea.html?id=static-${item.id}` : `idea.html?id=${item.id}`;
+                        card.className = 'comic-card';
+
+                        const category = item.category || 'Mad Chaos Ideas';
+                        let badgeHtml = '';
+                        if (category.includes('Chem') || category.includes('Hóa')) {
+                            badgeHtml = `<span class="badge-category badge-chemistry"><i class="fa-solid fa-flask"></i> Hóa Học</span>`;
+                        } else if (category.includes('Phys') || category.includes('Vật Lý')) {
+                            badgeHtml = `<span class="badge-category badge-physics"><i class="fa-solid fa-bolt"></i> Vật Lý</span>`;
+                        } else if (category.includes('Weapon') || category.includes('Vũ Khí')) {
+                            badgeHtml = `<span class="badge-category badge-weapon"><i class="fa-solid fa-explosion"></i> Vũ Khí Điên Rồ</span>`;
+                        } else if (category.includes('Cure') || category.includes('Medic') || category.includes('Chữa')) {
+                            badgeHtml = `<span class="badge-category badge-cure"><i class="fa-solid fa-dna"></i> Chữa Bệnh & Y Học</span>`;
+                        } else {
+                            badgeHtml = `<span class="badge-category badge-wild"><i class="fa-solid fa-brain"></i> Ý Tưởng Điên Rồ</span>`;
+                        }
+
+                        let coverHtml = '';
+                        if (item.coverBlob) {
+                            const coverUrl = URL.createObjectURL(item.coverBlob);
+                            coverHtml = `<img src="${coverUrl}" alt="${escapeHTML(item.title)}" class="comic-cover" onload="window.URL.revokeObjectURL('${coverUrl}')">`;
+                        } else {
+                            let iconClass = 'fa-lightbulb';
+                            if (category.includes('Chem') || category.includes('Hóa')) iconClass = 'fa-flask';
+                            else if (category.includes('Phys') || category.includes('Vật Lý')) iconClass = 'fa-atom';
+                            else if (category.includes('Weapon') || category.includes('Vũ Khí')) iconClass = 'fa-explosion';
+                            else if (category.includes('Cure') || category.includes('Chữa')) iconClass = 'fa-dna';
+
+                            coverHtml = `
+                                <div class="comic-placeholder-cover">
+                                    <i class="fa-solid ${iconClass}"></i>
+                                    <span style="font-weight:700; font-size:15px; margin-top:8px;">${escapeHTML(item.title)}</span>
+                                </div>
+                            `;
+                        }
+
+                        const summary = item.description || item.summary || 'Chưa có mô tả chi tiết.';
+                        const shortSummary = summary.length > 90 ? summary.slice(0, 90) + '...' : summary;
+
+                        card.innerHTML = `
+                            <div class="comic-cover-wrapper">
+                                ${coverHtml}
+                            </div>
+                            <div class="comic-info">
+                                ${badgeHtml}
+                                <h3 class="comic-title" title="${escapeHTML(item.title)}">${escapeHTML(item.title)}</h3>
+                                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4;">${escapeHTML(shortSummary)}</p>
+                                <p class="comic-author">
+                                    <i class="fa-solid fa-user-gear" style="font-size: 11px; margin-right: 4px;"></i>
+                                    ${escapeHTML(item.author || 'Tác giả Ẩn danh')}
+                                </p>
+                            </div>
+                        `;
+                        comicsGrid.appendChild(card);
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    comicsGrid.innerHTML = `
+                        <div class="no-comics" style="color:#f87171;">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <p>Không thể tải dữ liệu vault. Vui lòng làm mới trang.</p>
                         </div>
                     `;
-                    comicsGrid.appendChild(card);
-                });
-
-            } catch (err) {
-                console.error(err);
-                comicsGrid.innerHTML = `
-                    <div class="no-comics" style="color:#f87171;">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                        <p>Failed to load database. Please try reloading the page.</p>
-                    </div>
-                `;
+                }
             }
 
             function escapeHTML(str) {
@@ -164,6 +244,8 @@
                     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
                 );
             }
+
+            renderGrid();
         });
     </script>
 </body>

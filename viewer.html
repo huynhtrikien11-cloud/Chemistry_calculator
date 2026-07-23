@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reading - ComicVerse</title>
+    <title>Đọc & Xem Ý Tưởng / Spec Viewer - ChemPhys & MadChaosIdea</title>
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main styles -->
     <link rel="stylesheet" href="static/css/styles.css">
     <style>
         body.reader-body {
-            background-color: #05060a !important;
+            background-color: #040508 !important;
             display: block !important;
             min-height: 100vh;
         }
@@ -25,14 +25,49 @@
         #reader-main-view {
             display: none;
         }
+        /* Custom formatting for scientific text specs */
+        .text-page {
+            width: min(840px, calc(100vw - 32px));
+            min-height: calc(100vh - 180px);
+            padding: clamp(24px, 5vw, 56px);
+            background: #090c15;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            color: #f1f5f9;
+            font-family: 'Fira Code', monospace, Georgia, serif;
+            font-size: 16px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+        .text-page h3 {
+            color: var(--accent-cyan);
+            font-size: 20px;
+            font-family: 'Outfit', sans-serif;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(6, 182, 212, 0.3);
+            padding-bottom: 4px;
+        }
+        .text-page p {
+            margin-bottom: 1.2em;
+        }
+        .text-page .spec-warning {
+            background: rgba(245, 158, 11, 0.12);
+            border-left: 4px solid var(--accent-amber);
+            padding: 12px 16px;
+            margin: 14px 0;
+            color: #fde047;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="reader-body">
 
     <!-- Loading Panel -->
     <div id="reader-loading">
-        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 48px; color: var(--accent-purple); margin-bottom: 16px;"></i>
-        <p>Loading reader canvas...</p>
+        <i class="fa-solid fa-atom fa-spin" style="font-size: 52px; color: var(--accent-cyan); margin-bottom: 16px;"></i>
+        <p>Đang tải trình xem ý tưởng khoa học... / Launching Spec Viewer...</p>
     </div>
 
     <!-- Main Reader View (Initially Hidden) -->
@@ -42,17 +77,17 @@
             <div class="reader-nav">
                 <a href="#" id="back-link" class="reader-title">
                     <i class="fa-solid fa-arrow-left"></i>
-                    <span id="comic-title" class="comic-name-text">Comic Title</span>
+                    <span id="comic-title" class="comic-name-text">Tên Ý Tưởng</span>
                 </a>
                 
                 <div class="reader-controls">
-                    <button class="reader-btn active" id="btn-scroll-mode" title="Webtoon Scroll Mode">
-                        <i class="fa-solid fa-arrows-up-down"></i> Scroll
+                    <button class="reader-btn active" id="btn-scroll-mode" title="Cuộn dọc liên tục / Scroll Mode">
+                        <i class="fa-solid fa-arrows-up-down"></i> Cuộn Dọc
                     </button>
-                    <button class="reader-btn" id="btn-slide-mode" title="Page Slider Mode">
-                        <i class="fa-solid fa-file-image"></i> Page-by-Page
+                    <button class="reader-btn" id="btn-slide-mode" title="Từng trang / Slider Mode">
+                        <i class="fa-solid fa-file-lines"></i> Từng Trang
                     </button>
-                    <button class="reader-btn" id="btn-fullscreen" title="Toggle Fullscreen">
+                    <button class="reader-btn" id="btn-fullscreen" title="Bật/Tắt Toàn Màn Hình">
                         <i class="fa-solid fa-expand"></i>
                     </button>
                 </div>
@@ -64,7 +99,7 @@
             <div class="progress-bar-fill" id="progress-fill"></div>
         </div>
 
-        <!-- Mode 1: Webtoon Vertical Scroll Mode -->
+        <!-- Mode 1: Vertical Scroll Mode -->
         <div class="scroll-container" id="scroll-reader-view">
             <!-- Rendered dynamically by JavaScript -->
         </div>
@@ -72,21 +107,21 @@
         <!-- Mode 2: Page-by-Page Slider Mode -->
         <div class="slider-container" id="slider-reader-view">
             <div class="slider-stage">
-                <img id="slider-image-element" src="" alt="Comic Page" class="slider-image">
+                <img id="slider-image-element" src="" alt="Sơ đồ ý tưởng" class="slider-image">
                 <div id="slider-text-element" class="text-page" style="display: none;"></div>
                 
-                <button class="slider-nav slider-nav-prev" id="slider-prev-btn" title="Previous Page">
+                <button class="slider-nav slider-nav-prev" id="slider-prev-btn" title="Trang Trước">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
-                <button class="slider-nav slider-nav-next" id="slider-next-btn" title="Next Page">
+                <button class="slider-nav slider-nav-next" id="slider-next-btn" title="Trang Sau">
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
             </div>
             
             <div class="reader-footer-nav" id="slider-footer-controls" style="display: flex;">
-                <button class="reader-btn" id="footer-prev-btn"><i class="fa-solid fa-angle-left"></i> Prev</button>
-                <span id="page-indicator" style="font-weight: 600; color: var(--text-primary);">Page 1 of 1</span>
-                <button class="reader-btn" id="footer-next-btn">Next <i class="fa-solid fa-angle-right"></i></button>
+                <button class="reader-btn" id="footer-prev-btn"><i class="fa-solid fa-angle-left"></i> Trước</button>
+                <span id="page-indicator" style="font-weight: 600; color: var(--text-primary);">Trang 1 / 1</span>
+                <button class="reader-btn" id="footer-next-btn">Sau <i class="fa-solid fa-angle-right"></i></button>
             </div>
         </div>
     </div>
@@ -121,36 +156,37 @@
             const comicId = urlParams.get('id');
 
             if (!comicId) {
-                loadingPanel.innerHTML = '<p style="color:#f87171;">Error: No Comic ID specified.</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Return Home</a>';
+                loadingPanel.innerHTML = '<p style="color:#f87171;">Lỗi: Không tìm thấy ID ý tưởng.</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Quay lại Trang Chủ</a>';
                 return;
             }
 
-            // Set back button link
-            backLink.href = `comic.html?id=${comicId}`;
+            // Set back button link to idea.html
+            backLink.href = `idea.html?id=${comicId}`;
 
             try {
-                // Fetch data
+                const dbHandler = window.IdeaDB || window.ComicDB;
                 const staticStoryId = comicId.startsWith('static-') ? comicId.replace('static-', '') : '';
-                const comic = staticStoryId
+                const item = staticStoryId
                     ? (window.StaticStories || []).find(story => story.id === staticStoryId)
-                    : await ComicDB.getComic(comicId);
-                if (!comic) {
-                    loadingPanel.innerHTML = '<p style="color:#f87171;">Error: Comic not found.</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Return Home</a>';
+                    : await dbHandler.getComic(comicId);
+
+                if (!item) {
+                    loadingPanel.innerHTML = '<p style="color:#f87171;">Lỗi: Ý tưởng không tồn tại.</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Quay lại Trang Chủ</a>';
                     return;
                 }
 
-                const pages = staticStoryId ? [] : await ComicDB.getComicPages(comicId);
-                const textPages = paginateStoryText(comic.storyText || '');
+                const pages = staticStoryId ? [] : await dbHandler.getComicPages(comicId);
+                const textPages = paginateStoryText(item.storyText || '');
                 const isTextStory = textPages.length > 0;
 
                 if (pages.length === 0 && !isTextStory) {
-                    loadingPanel.innerHTML = '<p style="color:#f87171;">Error: Comic contains no pages.</p><a href="comic.html?id=' + comicId + '" class="btn btn-primary" style="margin-top:15px;">Go Back</a>';
+                    loadingPanel.innerHTML = '<p style="color:#f87171;">Lỗi: Ý tưởng không có nội dung.</p><a href="idea.html?id=' + comicId + '" class="btn btn-primary" style="margin-top:15px;">Quay lại</a>';
                     return;
                 }
 
                 // Populate title
-                comicTitleEl.innerText = comic.title;
-                document.title = `Reading: ${comic.title} - ComicVerse`;
+                comicTitleEl.innerText = item.title;
+                document.title = `Đọc: ${item.title} - ChemPhys & MadChaosIdea`;
 
                 // Cache page URLs
                 const pageUrls = pages.map(p => ({
@@ -173,7 +209,7 @@
                         const pageDiv = document.createElement('div');
                         pageDiv.className = 'scroll-page';
                         pageDiv.setAttribute('data-page', p.number);
-                        pageDiv.innerHTML = `<img src="${p.url}" alt="Page ${p.number}" loading="lazy">`;
+                        pageDiv.innerHTML = `<img src="${p.url}" alt="Sơ đồ ${p.number}" loading="lazy">`;
                         scrollReaderView.appendChild(pageDiv);
                     });
                 }
@@ -187,8 +223,8 @@
                 let currentPageIndex = 0;
 
                 // Load progress
-                const savedMode = localStorage.getItem(`comic_mode_${comicId}`);
-                const savedPage = localStorage.getItem(`comic_page_${comicId}`);
+                const savedMode = localStorage.getItem(`spec_mode_${comicId}`);
+                const savedPage = localStorage.getItem(`spec_page_${comicId}`);
                 
                 if (savedPage) {
                     currentPageIndex = Math.max(0, Math.min(parseInt(savedPage) - 1, totalPages - 1));
@@ -211,7 +247,7 @@
                 // Mode Selector
                 function setMode(mode) {
                     currentMode = mode;
-                    localStorage.setItem(`comic_mode_${comicId}`, mode);
+                    localStorage.setItem(`spec_mode_${comicId}`, mode);
                     
                     if (mode === 'scroll') {
                         scrollReaderView.style.display = 'flex';
@@ -248,8 +284,8 @@
                         sliderImg.src = page.url;
                     }
 
-                    pageIndicator.innerText = `Page ${pageNumber} of ${totalPages}`;
-                    localStorage.setItem(`comic_page_${comicId}`, pageNumber);
+                    pageIndicator.innerText = `Trang ${pageNumber} / ${totalPages}`;
+                    localStorage.setItem(`spec_page_${comicId}`, pageNumber);
                     updateProgress();
                     window.scrollTo({ top: 0, behavior: 'instant' });
                 }
@@ -289,7 +325,7 @@
                 ftrNext.addEventListener('click', nextPage);
                 ftrPrev.addEventListener('click', prevPage);
 
-                // Image clicks (Left side vs Right side)
+                // Image clicks
                 sliderImg.addEventListener('click', (e) => {
                     const rect = sliderImg.getBoundingClientRect();
                     const x = e.clientX - rect.left;
@@ -318,7 +354,6 @@
                     if (currentMode === 'scroll') {
                         updateProgress();
                         
-                        // Save last scrolled page
                         const pageElements = document.querySelectorAll('.scroll-page');
                         let visiblePage = 1;
                         for (let el of pageElements) {
@@ -328,7 +363,7 @@
                                 break;
                             }
                         }
-                        localStorage.setItem(`comic_page_${comicId}`, visiblePage);
+                        localStorage.setItem(`spec_page_${comicId}`, visiblePage);
                     }
                 });
 
@@ -350,14 +385,14 @@
                 btnScrollMode.addEventListener('click', () => setMode('scroll'));
                 btnSlideMode.addEventListener('click', () => setMode('slide'));
 
-                // Clean up Blob URLs on page unload to free memory
+                // Clean up Blob URLs on page unload
                 window.addEventListener('beforeunload', () => {
                     pageUrls.forEach(p => URL.revokeObjectURL(p.url));
                 });
 
             } catch (err) {
                 console.error(err);
-                loadingPanel.innerHTML = '<p style="color:#f87171;">Failed to load reader: ' + err.message + '</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Return Home</a>';
+                loadingPanel.innerHTML = '<p style="color:#f87171;">Lỗi khi tải nội dung: ' + err.message + '</p><a href="index.html" class="btn btn-primary" style="margin-top:15px;">Quay lại Trang Chủ</a>';
             }
 
             function paginateStoryText(text) {
@@ -367,7 +402,7 @@
                 const paragraphs = normalized.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean);
                 const pages = [];
                 let currentPage = '';
-                const maxChars = 950;
+                const maxChars = 1100;
 
                 paragraphs.forEach(paragraph => {
                     if ((currentPage + '\n\n' + paragraph).trim().length > maxChars && currentPage) {
@@ -385,7 +420,15 @@
             function formatStoryText(text) {
                 return text
                     .split(/\n\s*\n/)
-                    .map(paragraph => `<p>${escapeHTML(paragraph)}</p>`)
+                    .map(paragraph => {
+                        const trimmed = paragraph.trim();
+                        if (trimmed.startsWith('WARNING:') || trimmed.startsWith('CAUTION:') || trimmed.startsWith('CẢNH BÁO:')) {
+                            return `<div class="spec-warning"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHTML(trimmed)}</div>`;
+                        } else if (trimmed.startsWith('===') || (trimmed.match(/^[0-9]\./) && trimmed.length < 80)) {
+                            return `<h3 style="color:var(--accent-cyan); font-weight:700; margin:16px 0 8px;">${escapeHTML(trimmed.replace(/^=+/g, '').replace(/=+$/g, ''))}</h3>`;
+                        }
+                        return `<p>${escapeHTML(trimmed)}</p>`;
+                    })
                     .join('');
             }
 

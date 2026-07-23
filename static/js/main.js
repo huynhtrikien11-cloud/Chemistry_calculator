@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pagesPreview = document.getElementById('pages-preview-list');
     const archivePreview = document.getElementById('archive-preview-list');
 
-    let currentUploadMethod = 'images'; // 'images', 'archive', or 'text'
+    let currentUploadMethod = 'text'; // Default method: 'text', 'images', or 'archive'
 
     if (tabImages && tabArchive && tabText) {
         tabImages.addEventListener('click', () => {
@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
             groupImages.style.display = 'block';
             groupArchive.style.display = 'none';
             groupText.style.display = 'none';
-            // Clear archive input
             archiveInput.value = '';
             if (archivePreview) {
                 archivePreview.style.display = 'none';
@@ -39,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
             groupArchive.style.display = 'block';
             groupImages.style.display = 'none';
             groupText.style.display = 'none';
-            // Clear pages input
             pagesInput.value = '';
             if (pagesPreview) {
                 pagesPreview.style.display = 'none';
@@ -92,11 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             dropzone.classList.remove('dragover');
             if (e.dataTransfer.files.length > 0) {
-                // If it is multi-file pages-input, assign all dropped files
                 if (input.multiple) {
                     input.files = e.dataTransfer.files;
                 } else {
-                    // Otherwise just assign the first file (e.g. cover or archive)
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(e.dataTransfer.files[0]);
                     input.files = dataTransfer.files;
@@ -120,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (files && files[0]) {
             const file = files[0];
             if (!file.type.startsWith('image/')) {
-                alert('Cover file must be an image!');
+                alert('Cover schematic file must be an image!');
                 coverInput.value = '';
                 return;
             }
@@ -145,8 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDropzone('pages-dropzone', 'pages-input', (files) => {
         if (files && files.length > 0) {
             pagesPreview.style.display = 'block';
-            
-            // Filter invalid files client side for presentation
             const fileNames = Array.from(files)
                 .map(file => {
                     const isImg = file.type.startsWith('image/');
@@ -157,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .join('');
                 
-            pagesPreview.innerHTML = `<strong>Selected Pages (${files.length}):</strong><div style="margin-top:8px;">${fileNames}</div>`;
+            pagesPreview.innerHTML = `<strong>Selected Diagrams (${files.length}):</strong><div style="margin-top:8px;">${fileNames}</div>`;
         }
     });
 
@@ -174,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             archivePreview.style.display = 'block';
-            archivePreview.innerHTML = `<strong>Selected Archive:</strong>
+            archivePreview.innerHTML = `<strong>Selected Blueprint Archive:</strong>
                 <div style="margin-top:8px; display:flex; justify-content:space-between;">
                     <span><i class="fa-solid fa-file-zipper" style="margin-right:6px;"></i> ${escapeHTML(file.name)}</span>
                     <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>
@@ -182,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 5. Client-Side Database Processing and Saving
+    // 5. Database Processing and Saving
     const uploadForm = document.getElementById('upload-form');
     const loadingOverlay = document.getElementById('upload-loading-overlay');
     const loadingTitle = document.getElementById('loading-title');
@@ -194,28 +188,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Field values
             const title = document.getElementById('title').value.trim();
-            const author = document.getElementById('author').value.trim();
+            const categoryEl = document.getElementById('category');
+            const category = categoryEl ? categoryEl.value : 'Mad Chaos Ideas';
+            const author = document.getElementById('author').value.trim() || 'Anonymous Genius';
             const description = document.getElementById('description').value.trim();
             const storyText = storyTextInput ? storyTextInput.value.trim() : '';
 
             if (!title) {
-                alert('Title is required!');
+                alert('Invention Title is required!');
                 return;
             }
 
-            // Verify uploads selection
+            // Verify upload selection
             if (currentUploadMethod === 'images' && (!pagesInput.files || pagesInput.files.length === 0)) {
-                alert('Please upload at least one page image for the comic!');
+                alert('Please upload at least one schematic diagram image!');
                 return;
             }
 
             if (currentUploadMethod === 'archive' && (!archiveInput.files || archiveInput.files.length === 0)) {
-                alert('Please select a ZIP or CBZ file to upload!');
+                alert('Please select a ZIP file to upload!');
                 return;
             }
 
             if (currentUploadMethod === 'text' && !storyText) {
-                alert('Please write or paste your story content!');
+                alert('Please write or paste your spec paper content!');
                 return;
             }
 
@@ -229,14 +225,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     coverBlob = coverInput.files[0];
                 }
 
-                // 2. Process Comic Pages
+                // 2. Process Diagrams
                 let pageBlobs = [];
 
                 if (currentUploadMethod === 'images') {
-                    loadingTitle.innerText = "Reading Page Files...";
-                    loadingDescription.innerText = "Converting selected page files to database format.";
+                    loadingTitle.innerText = "Reading Diagram Files...";
+                    loadingDescription.innerText = "Converting selected diagram images into database format.";
                     
-                    // Sort files naturally by filename
                     const sortedFiles = Array.from(pagesInput.files).sort((a, b) => 
                         a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
                     );
@@ -248,17 +243,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     if (pageBlobs.length === 0) {
-                        throw new Error('No valid image files found in pages upload.');
+                        throw new Error('No valid image files found in upload.');
                     }
 
                 } else if (currentUploadMethod === 'archive') {
                     loadingTitle.innerText = "Extracting Archive...";
-                    loadingDescription.innerText = "Decompressing pages directly in your browser. This might take a few moments for larger comics.";
+                    loadingDescription.innerText = "Decompressing blueprint files directly in browser memory.";
 
                     const archiveFile = archiveInput.files[0];
                     const zip = await JSZip.loadAsync(archiveFile);
                     
-                    // Filter and naturally sort internal paths
                     const validExtensions = ['png', 'jpg', 'jpeg', 'webp'];
                     const internalPaths = Object.keys(zip.files).filter(path => {
                         const file = zip.files[path];
@@ -271,50 +265,47 @@ document.addEventListener('DOMContentLoaded', () => {
                         return validExtensions.includes(ext);
                     });
 
-                    // Sort filenames naturally
                     internalPaths.sort((a, b) => 
                         a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
                     );
 
                     if (internalPaths.length === 0) {
-                        throw new Error('No valid images (PNG, JPG, JPEG, WEBP) found in the zip archive.');
+                        throw new Error('No valid images (PNG, JPG, JPEG, WEBP) found in zip archive.');
                     }
 
-                    loadingTitle.innerText = "Converting Extracted Pages...";
-                    loadingDescription.innerText = `Preparing ${internalPaths.length} pages to write to browser storage.`;
+                    loadingTitle.innerText = "Converting Extracted Schematics...";
+                    loadingDescription.innerText = `Preparing ${internalPaths.length} blueprint pages for browser vault.`;
 
-                    // Retrieve each file content as blob
                     for (let path of internalPaths) {
                         const fileBlob = await zip.file(path).async('blob');
                         
-                        // Set standard mime type if empty
                         let mimeType = fileBlob.type;
                         if (!mimeType) {
                             const ext = path.split('.').pop().toLowerCase();
                             mimeType = ext === 'webp' ? 'image/webp' : (ext === 'png' ? 'image/png' : 'image/jpeg');
                         }
                         
-                        // Wrap as a properly typed Blob
                         const typedBlob = new Blob([fileBlob], { type: mimeType });
                         pageBlobs.push(typedBlob);
                     }
                 } else if (currentUploadMethod === 'text') {
-                    loadingTitle.innerText = "Preparing Story Text...";
-                    loadingDescription.innerText = "Saving your written chapter for the page-by-page reader.";
+                    loadingTitle.innerText = "Indexing Spec Article...";
+                    loadingDescription.innerText = "Formatting text sections for high-contrast viewing.";
                 }
 
                 // 3. Save to database
-                loadingTitle.innerText = "Saving to Database...";
-                loadingDescription.innerText = "Writing pages to local IndexedDB storage.";
+                loadingTitle.innerText = "Writing to Mad Science Vault...";
+                loadingDescription.innerText = "Saving data into IndexedDB browser storage.";
                 
-                const comicId = await ComicDB.saveComic(title, author, description, coverBlob, pageBlobs, storyText);
+                const dbHandler = window.IdeaDB || window.ComicDB;
+                const comicId = await dbHandler.saveComic(title, author, description, coverBlob, pageBlobs, storyText, category);
 
                 // Success redirect
-                loadingTitle.innerText = "Publishing Complete!";
-                loadingDescription.innerText = "Redirecting to your new comic page.";
+                loadingTitle.innerText = "Publication Complete!";
+                loadingDescription.innerText = "Redirecting to your new breakthrough spec page.";
                 
                 setTimeout(() => {
-                    window.location.href = `comic.html?id=${comicId}`;
+                    window.location.href = `idea.html?id=${comicId}`;
                 }, 500);
 
             } catch (err) {

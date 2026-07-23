@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Comic - ComicVerse</title>
+    <title>Đăng Ý Tưởng / Submit Idea - ChemPhys & MadChaosIdea</title>
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main styles -->
@@ -20,15 +20,15 @@
     <header>
         <div class="container navbar">
             <a href="index.html" class="logo">
-                <i class="fa-solid fa-book-open-reader"></i>
-                <span>ComicVerse</span>
+                <i class="fa-solid fa-atom"></i>
+                <span>ChemPhys & MadChaosIdea</span>
             </a>
             <nav class="nav-links">
                 <a href="index.html" class="nav-btn">
-                    <i class="fa-solid fa-house"></i> Home
+                    <i class="fa-solid fa-house"></i> Kho Vault
                 </a>
                 <a href="upload.html" class="nav-btn nav-btn-primary active">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Comic
+                    <i class="fa-solid fa-flask-vial"></i> Đăng Ý Tưởng / Upload Spec
                 </a>
             </nav>
         </div>
@@ -37,95 +37,107 @@
     <!-- Main Container -->
     <main class="container">
         <div class="upload-card">
-            <h2>Upload Your Comic Book</h2>
+            <h2>Đăng Tải Đột Phá Khoa Học Hoặc Ý Tưởng Điên Rồ</h2>
             
             <form id="upload-form" onsubmit="return false;">
-                <!-- Comic Title -->
+                <!-- Idea Title -->
                 <div class="form-group">
-                    <label for="title">Comic Title *</label>
-                    <input type="text" id="title" name="title" class="form-control" placeholder="Enter the name of your comic" required>
+                    <label for="title">Tên Ý Tưởng / Đột Phá / Phát Minh *</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Ví dụ: Tên Lửa Đẩy Plasma Chân Không hoặc Nanobot Chữa Ung Thư" required>
                 </div>
                 
-                <!-- Author / Creator -->
+                <!-- Category Select -->
                 <div class="form-group">
-                    <label for="author">Author / Artist</label>
-                    <input type="text" id="author" name="author" class="form-control" placeholder="Who created this comic? (e.g. Stan Lee)">
+                    <label for="category">Danh Mục / Category *</label>
+                    <select id="category" name="category" class="form-control" style="background: var(--bg-secondary); cursor: pointer;" required>
+                        <option value="Chemistry">🧪 Hóa Học (Chemistry - Hợp chất, Phản ứng, Vật liệu)</option>
+                        <option value="Physics">⚡ Vật Lý (Physics - Cơ học lượng tử, Vũ trụ, Năng lượng)</option>
+                        <option value="Mad Chaos Weapons">💥 Vũ Khí Siêu Táo Bạo (Mad Chaos Weapons - Súng Laser, Hạt nhân, Pháo Plasma)</option>
+                        <option value="Cures & Medical">🧬 Chữa Bệnh & Y Học (Cures & Medical - Thuốc chữa Ung thư, Nanobot, Tế bào gốc)</option>
+                        <option value="Wild Thoughts" selected>🧠 Ý Tưởng Siêu Đột Phá (Wild Thoughts & Freeform Ideas)</option>
+                    </select>
+                </div>
+
+                <!-- Inventor / Author -->
+                <div class="form-group">
+                    <label for="author">Tác Giả / Nhà Sáng Tạo (Inventor / Author)</label>
+                    <input type="text" id="author" name="author" class="form-control" placeholder="Tên tác giả hoặc tên tài khoản của bạn (Ví dụ: huynhtrikien11-cloud)">
                 </div>
                 
-                <!-- Description -->
+                <!-- Description / Abstract -->
                 <div class="form-group">
-                    <label for="description">Description / Synopsis</label>
-                    <textarea id="description" name="description" class="form-control" placeholder="Write a short summary about the story, characters, or release notes..."></textarea>
+                    <label for="description">Tóm Tắt Ý Tưởng (Abstract / Executive Summary)</label>
+                    <textarea id="description" name="description" class="form-control" placeholder="Tóm tắt nguyên lý hoạt động, cấu trúc phân tử, công suất hoặc tính ứng dụng thực tiễn của ý tưởng..."></textarea>
                 </div>
                 
-                <!-- Cover Image Dropzone -->
+                <!-- Cover Image / Schematic Dropzone -->
                 <div class="form-group">
-                    <label>Cover Art / Thumbnail</label>
+                    <label>Ảnh Bìa / Ảnh Sơ Đồ Thiết Kế (Cover / Schematic Image)</label>
                     <div class="dropzone" id="cover-dropzone">
-                        <i class="fa-solid fa-image"></i>
-                        <p>Drag & drop cover art here, or <strong>browse</strong></p>
-                        <span>Supports PNG, JPG, JPEG, WEBP. Max 5MB.</span>
+                        <i class="fa-solid fa-microscope" style="color: var(--accent-cyan);"></i>
+                        <p>Kéo & thả ảnh minh họa / bản vẽ tại đây, hoặc <strong>chọn tệp</strong></p>
+                        <span>Hỗ trợ định dạng PNG, JPG, JPEG, WEBP. Tối đa 5MB.</span>
                         <input type="file" id="cover-input" name="cover" accept="image/*" style="display: none;">
                     </div>
                     <div id="cover-preview-container" style="display: none; margin-top: 15px; text-align: center;">
-                        <img id="cover-preview-img" src="" alt="Cover Preview" style="max-height: 200px; border-radius: 8px; border: var(--glass-border); box-shadow: var(--glass-shadow);">
+                        <img id="cover-preview-img" src="" alt="Xem trước ảnh bìa" style="max-height: 200px; border-radius: 8px; border: var(--glass-border); box-shadow: var(--glass-shadow);">
                         <button type="button" id="remove-cover-btn" class="btn btn-danger" style="display: block; margin: 10px auto 0; padding: 6px 12px; font-size: 13px;">
-                            <i class="fa-solid fa-xmark"></i> Remove Cover
+                            <i class="fa-solid fa-xmark"></i> Xóa Ảnh Bìa
                         </button>
                     </div>
                 </div>
                 
                 <!-- Upload Method Selector -->
                 <div class="form-group" style="margin-top: 40px;">
-                    <label>How would you like to upload the pages?</label>
+                    <label>Bạn muốn trình bày ý tưởng theo hình thức nào?</label>
                     <div class="upload-method-selector">
-                        <div class="method-tab active" id="tab-images">
-                            <i class="fa-solid fa-images"></i> Multiple Images
+                        <div class="method-tab active" id="tab-text">
+                            <i class="fa-solid fa-file-lines"></i> Bài Viết Văn Bản
+                        </div>
+                        <div class="method-tab" id="tab-images">
+                            <i class="fa-solid fa-images"></i> Nhiều Ảnh Bản Vẽ
                         </div>
                         <div class="method-tab" id="tab-archive">
-                            <i class="fa-solid fa-file-zipper"></i> ZIP / CBZ Archive
-                        </div>
-                        <div class="method-tab" id="tab-text">
-                            <i class="fa-solid fa-align-left"></i> Story Text
+                            <i class="fa-solid fa-file-zipper"></i> Tệp Nén ZIP
                         </div>
                     </div>
                 </div>
                 
-                <!-- Option 1: Multiple Pages (Images) Dropzone -->
-                <div class="form-group" id="group-images-upload">
-                    <label>Comic Pages *</label>
+                <!-- Option 1: Written Spec / Story Text -->
+                <div class="form-group" id="group-text-upload">
+                    <label for="story-text-input">Nội Dung Chi Tiết Bài Viết / Bản Thiết Kế *</label>
+                    <textarea id="story-text-input" name="storyText" class="form-control story-textarea" placeholder="Dán hoặc nhập toàn bộ nội dung bài nghiên cứu, các bước phản ứng hóa học, hướng dẫn sử dụng vũ khí, hoặc các ý tưởng điên rồ tại đây. Phân chia các đoạn bằng cách xuống dòng trắng."></textarea>
+                    <p class="form-help">Mẹo: Dòng trống giúp tự động chia nhỏ nội dung thành các trang đọc dễ quan sát.</p>
+                </div>
+
+                <!-- Option 2: Multiple Pages (Images) Dropzone -->
+                <div class="form-group" id="group-images-upload" style="display: none;">
+                    <label>Các Trang Sơ Đồ Thiết Kế *</label>
                     <div class="dropzone" id="pages-dropzone">
                         <i class="fa-solid fa-images" style="color: var(--accent-purple);"></i>
-                        <p>Drag & drop all page images here, or <strong>browse</strong></p>
-                        <span>Select multiple images. Pages will be sorted alphabetically/numerically by filename.</span>
+                        <p>Kéo & thả tất cả ảnh sơ đồ tại đây, hoặc <strong>chọn tệp</strong></p>
+                        <span>Có thể chọn nhiều ảnh cùng lúc. Trang sẽ sắp xếp theo thứ tự tên tệp.</span>
                         <input type="file" id="pages-input" name="pages" accept="image/*" multiple style="display: none;">
                     </div>
                     <div id="pages-preview-list" class="file-list-preview" style="display: none;"></div>
                 </div>
                 
-                <!-- Option 2: Archive Dropzone -->
+                <!-- Option 3: Archive Dropzone -->
                 <div class="form-group" id="group-archive-upload" style="display: none;">
-                    <label>Comic Archive (ZIP / CBZ) *</label>
+                    <label>Tệp Nén Lưu Trữ (ZIP / CBZ) *</label>
                     <div class="dropzone" id="archive-dropzone">
-                        <i class="fa-solid fa-file-zipper" style="color: var(--accent-pink);"></i>
-                        <p>Drag & drop your comic archive here, or <strong>browse</strong></p>
-                        <span>Supports .zip or .cbz file extensions. Recommended for pre-sequenced chapters.</span>
+                        <i class="fa-solid fa-file-zipper" style="color: var(--accent-amber);"></i>
+                        <p>Kéo & thả tệp nén sơ đồ tại đây, hoặc <strong>chọn tệp</strong></p>
+                        <span>Hỗ trợ tệp có đuôi .zip hoặc .cbz. Khuyên dùng cho bộ sơ đồ gồm nhiều trang.</span>
                         <input type="file" id="archive-input" name="archive" accept=".zip,.cbz" style="display: none;">
                     </div>
                     <div id="archive-preview-list" class="file-list-preview" style="display: none;"></div>
                 </div>
-
-                <!-- Option 3: Story Text -->
-                <div class="form-group" id="group-text-upload" style="display: none;">
-                    <label for="story-text-input">Story Content *</label>
-                    <textarea id="story-text-input" name="storyText" class="form-control story-textarea" placeholder="Paste or write your story here. Blank lines are kept as paragraph breaks. The reader will split it into pages automatically."></textarea>
-                    <p class="form-help">Tip: use blank lines between paragraphs. Readers can press the left and right arrow keys to turn pages.</p>
-                </div>
                 
                 <!-- Submit Button -->
                 <div style="margin-top: 40px; text-align: center;">
-                    <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; max-width: 300px; padding: 14px 28px; font-size: 16px;">
-                        <i class="fa-solid fa-circle-check"></i> Upload and Publish
+                    <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; max-width: 360px; padding: 16px 28px; font-size: 16px;">
+                        <i class="fa-solid fa-paper-plane"></i> Đăng Lên Kho Ý Tưởng / Publish
                     </button>
                 </div>
             </form>
@@ -133,22 +145,22 @@
     </main>
 
     <!-- Uploading Loading Modal Overlay -->
-    <div id="upload-loading-overlay" style="display: none; position: fixed; inset: 0; background: rgba(5,6,10,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; flex-direction: column;">
-        <div style="background: var(--bg-card); border: var(--glass-border); padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; box-shadow: var(--glass-shadow); display: flex; flex-direction: column; align-items: center; gap: 20px;">
-            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 48px; color: var(--accent-purple);"></i>
-            <h3 id="loading-title" style="font-size: 20px; font-weight: 700;">Processing Comic Files...</h3>
-            <p id="loading-description" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Extracting pages, naturally ordering images, and saving to IndexedDB browser storage. Please do not refresh this page.</p>
+    <div id="upload-loading-overlay" style="display: none; position: fixed; inset: 0; background: rgba(248,250,252,0.92); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; flex-direction: column;">
+        <div style="background: #ffffff; border: 1px solid rgba(15,23,42,0.14); padding: 40px; border-radius: 20px; text-align: center; max-width: 420px; box-shadow: 0 15px 40px rgba(15,23,42,0.12); display: flex; flex-direction: column; align-items: center; gap: 20px;">
+            <i class="fa-solid fa-atom fa-spin" style="font-size: 54px; color: var(--accent-cyan);"></i>
+            <h3 id="loading-title" style="font-size: 20px; font-weight: 800; color: var(--text-primary);">Đang Lưu Ý Tưởng...</h3>
+            <p id="loading-description" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">Đang mã hóa dữ liệu và lưu vào kho lưu trữ trình duyệt local của bạn. Vui lòng không đóng trang này.</p>
         </div>
     </div>
 
     <!-- Global Footer -->
     <footer>
         <div class="container">
-            <p>&copy; 2026 ComicVerse. Purely client-side application deployed on GitHub Pages.</p>
+            <p>&copy; 2026 ChemPhys & MadChaosIdea. Kho lưu trữ ý tưởng dành cho người Việt và những nhà sáng tạo toàn cầu. 🇻🇳</p>
         </div>
     </footer>
 
-    <!-- JSZip Library CDN (Required for ZIP/CBZ processing) -->
+    <!-- JSZip Library CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- Database Interface -->
     <script src="static/js/db.js"></script>

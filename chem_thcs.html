@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHEM THCS - Kho Công Thức & Máy Tính Hóa Học</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CHEM THCS Stylesheet -->
+    <link rel="stylesheet" href="static/css/chem_thcs.css">
+</head>
+<body>
+    <div id="app-root">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <a href="#" class="sidebar-brand" onclick="navigateTo('home-view')">
+                <div class="brand-icon"><i class="fa-solid fa-flask"></i></div>
+                <div>
+                    <div class="brand-title">CHEM THCS</div>
+                    <div class="brand-tagline">Kho công thức & Máy tính Hóa</div>
+                </div>
+            </a>
+
+            <nav class="sidebar-menu">
+                <a class="nav-item active" onclick="navigateTo('home-view', this)">
+                    <i class="fa-solid fa-house"></i> <span>Trang chủ</span>
+                </a>
+                <a class="nav-item" onclick="navigateTo('formulas-view', this)">
+                    <i class="fa-solid fa-book-open"></i> <span>Kho công thức</span>
+                </a>
+                <a class="nav-item" onclick="navigateTo('calculator-view', this)">
+                    <i class="fa-solid fa-calculator"></i> <span>Máy tính Hóa</span>
+                </a>
+                <a class="nav-item" onclick="navigateTo('equations-view', this)">
+                    <i class="fa-solid fa-vial-circle-check"></i> <span>Phương trình hóa học</span>
+                </a>
+                <a class="nav-item" onclick="navigateTo('periodic-view', this)">
+                    <i class="fa-solid fa-atom"></i> <span>Bảng tuần hoàn</span>
+                </a>
+                <a class="nav-item" onclick="navigateTo('quiz-view', this)">
+                    <i class="fa-solid fa-pen-to-square"></i> <span>Bài tập</span>
+                </a>
+                <a class="nav-item" onclick="navigateTo('favorites-view', this)">
+                    <i class="fa-solid fa-star"></i> <span>Công thức yêu thích</span>
+                </a>
+                <a class="nav-item" onclick="navigateTo('history-view', this)">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span>Lịch sử</span>
+                </a>
+                <a class="nav-item" onclick="navigateTo('settings-view', this)">
+                    <i class="fa-solid fa-circle-info"></i> <span>Giới thiệu & Tổng hợp</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="app-main">
+            <!-- Header Bar -->
+            <header class="app-header">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="header-page-title" id="header-page-title">
+                        <i class="fa-solid fa-house"></i> Trang chủ
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <div class="global-search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="global-search-input" placeholder="Tìm công thức, nguyên tố (Fe, mol)..." oninput="onGlobalSearch(this.value)">
+                    </div>
+                    <button class="theme-toggle-btn" title="Chuyển Dark / Light Mode" onclick="toggleTheme()">
+                        <i class="fa-solid fa-moon" id="theme-icon"></i>
+                    </button>
+                    <button class="btn-secondary" style="padding: 8px 14px;" onclick="navigateTo('home-view')">
+                        <i class="fa-solid fa-house"></i> Trang chủ
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page Container Views -->
+            <div class="page-container">
+                
+                <!-- Search Overlay Results -->
+                <div id="search-results-overlay" class="chem-card" style="display: none; margin-bottom: 24px; border-color: var(--accent-cyan);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="font-size: 16px; font-weight: 800; color: var(--accent-cyan);">Kết quả tìm kiếm</h3>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="closeSearchOverlay()">Đóng</button>
+                    </div>
+                    <div id="search-results-list"></div>
+                </div>
+
+                <!-- VIEW 1: TRANG CHỦ -->
+                <section id="home-view" class="page-view active">
+                    <div class="hero-banner">
+                        <h1 class="hero-title">CHEM <span>THCS</span></h1>
+                        <p class="hero-desc">Tra cứu công thức. Tính bài. Hiểu bản chất. Nền tảng Hóa học tương tác thực tế dành cho học sinh Lớp 8–9.</p>
+                        <div class="hero-actions">
+                            <button class="btn-primary" onclick="navigateTo('calculator-view')">
+                                <i class="fa-solid fa-calculator"></i> Máy tính ngay
+                            </button>
+                            <button class="btn-secondary" onclick="navigateTo('formulas-view')">
+                                <i class="fa-solid fa-book-open"></i> Xem công thức
+                            </button>
+                            <button class="btn-secondary" onclick="navigateTo('equations-view')">
+                                <i class="fa-solid fa-vial-circle-check"></i> Cân bằng PTHH
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <h2 style="font-size: 20px; font-weight: 800;">"Bạn muốn tính gì?" (Lựa chọn nhanh)</h2>
+                    </div>
+
+                    <!-- Quick Calculators Cards Grid -->
+                    <div class="grid-cards">
+                        <div class="chem-card" onclick="openCalcWithMode('mol_by_mass')">
+                            <div class="card-icon-badge"><i class="fa-solid fa-weight-hanging"></i></div>
+                            <div class="card-title">Số mol (n = m / M)</div>
+                            <div class="card-desc">Tính số mol từ khối lượng m và khối lượng mol M.</div>
+                            <button class="btn-primary" style="width: 100%; justify-content: center;">Tính ngay</button>
+                        </div>
+
+                        <div class="chem-card" onclick="openCalcWithMode('mass_by_mol')">
+                            <div class="card-icon-badge" style="background: rgba(124, 58, 237, 0.1); color: var(--accent-purple);"><i class="fa-solid fa-scale-balanced"></i></div>
+                            <div class="card-title">Khối lượng (m = n × M)</div>
+                            <div class="card-desc">Tính khối lượng chất từ số mol và phân tử khối.</div>
+                            <button class="btn-primary" style="width: 100%; justify-content: center; background: var(--accent-purple);">Tính ngay</button>
+                        </div>
+
+                        <div class="chem-card" onclick="openCalcWithMode('vol_by_mol')">
+                            <div class="card-icon-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald);"><i class="fa-solid fa-wind"></i></div>
+                            <div class="card-title">Thể tích khí (V = n × Vm)</div>
+                            <div class="card-desc">Tính thể tích khí ở ĐKTC (22.4L) hoặc điều kiện chuẩn 25°C (24.79L).</div>
+                            <button class="btn-primary" style="width: 100%; justify-content: center; background: var(--accent-emerald);">Tính ngay</button>
+                        </div>
+
+                        <div class="chem-card" onclick="navigateTo('periodic-view')">
+                            <div class="card-icon-badge" style="background: rgba(245, 158, 11, 0.1); color: var(--accent-amber);"><i class="fa-solid fa-atom"></i></div>
+                            <div class="card-title">Phân tử khối & Parser CTHH</div>
+                            <div class="card-desc">Tự động phân tích CTHH phức tạp Ca(OH)₂, Al₂(SO₄)₃ để tính M_r.</div>
+                            <button class="btn-primary" style="width: 100%; justify-content: center; background: var(--accent-amber);">Phân tích ngay</button>
+                        </div>
+
+                        <div class="chem-card" onclick="openCalcWithMode('c_percent')">
+                            <div class="card-icon-badge" style="background: rgba(219, 39, 119, 0.1); color: var(--accent-pink);"><i class="fa-solid fa-percent"></i></div>
+                            <div class="card-title">Nồng độ phần trăm (C%)</div>
+                            <div class="card-desc">Tính nồng độ % dung dịch từ m_ct và m_dd.</div>
+                            <button class="btn-primary" style="width: 100%; justify-content: center; background: var(--accent-pink);">Tính ngay</button>
+                        </div>
+
+                        <div class="chem-card" onclick="openCalcWithMode('cm_molarity')">
+                            <div class="card-icon-badge" style="background: rgba(37, 99, 235, 0.1); color: var(--accent-blue);"><i class="fa-solid fa-flask-vial"></i></div>
+                            <div class="card-title">Nồng độ Mol (C_M)</div>
+                            <div class="card-desc">Tính nồng độ mol C_M từ số mol n và thể tích V (lít hoặc ml).</div>
+                            <button class="btn-primary" style="width: 100%; justify-content: center; background: var(--accent-blue);">Tính ngay</button>
+                        </div>
+
+                        <div class="chem-card" onclick="openCalcWithMode('gas_density')">
+                            <div class="card-icon-badge"><i class="fa-solid fa-cloud"></i></div>
+                            <div class="card-title">Tỉ khối chất khí (d_A/B)</div>
+                            <div class="card-desc">So sánh tỉ khối của khí A đối với khí B hoặc không khí.</div>
+                            <button class="btn-primary" style="width: 100%; justify-content: center;">Tính ngay</button>
+                        </div>
+                    </div>
+
+                    <!-- Topic Cards Section -->
+                    <div style="margin: 28px 0 16px 0;">
+                        <h2 style="font-size: 20px; font-weight: 800;">Chủ đề Hóa Học THCS</h2>
+                    </div>
+                    <div class="grid-cards">
+                        <div class="chem-card">
+                            <div class="card-title">📐 Công thức hóa học</div>
+                            <div class="card-desc">Ý nghĩa CTHH, phân tử khối, quy tắc hóa trị a·x = b·y.</div>
+                        </div>
+                        <div class="chem-card">
+                            <div class="card-title">🧮 Mol & Khối lượng</div>
+                            <div class="card-desc">Khái niệm mol, khối lượng mol M, chuyển đổi m và n.</div>
+                        </div>
+                        <div class="chem-card">
+                            <div class="card-title">💨 Chất khí</div>
+                            <div class="card-desc">Thể tích khí ĐKTC, điều kiện chuẩn mới, tỷ khối d_A/B.</div>
+                        </div>
+                        <div class="chem-card">
+                            <div class="card-title">🧪 Dung dịch</div>
+                            <div class="card-desc">Độ tan, nồng độ C%, nồng độ mol C_M, pha chế dung dịch.</div>
+                        </div>
+                        <div class="chem-card">
+                            <div class="card-title">⚗️ Phương trình hóa học</div>
+                            <div class="card-desc">Các bước lập PTHH, ý nghĩa phương trình, tính theo PTHH.</div>
+                        </div>
+                        <div class="chem-card">
+                            <div class="card-title">⚖️ Bảo toàn khối lượng</div>
+                            <div class="card-desc">Tổng khối lượng chất tham gia = tổng khối lượng sản phẩm.</div>
+                        </div>
+                        <div class="chem-card">
+                            <div class="card-title">🧫 Axit – Bazơ – Muối – Oxit</div>
+                            <div class="card-desc">Phân loại hợp chất vô cơ, tính chất hóa học cơ bản THCS.</div>
+                        </div>
+                        <div class="chem-card">
+                            <div class="card-title">🔩 Kim loại</div>
+                            <div class="card-desc">Dãy hoạt động hóa học của kim loại, kim loại + axit/muối.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: KHO CÔNG THỨC -->
+                <section id="formulas-view" class="page-view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <div>
+                            <h2 style="font-size: 24px; font-weight: 900;">📚 Kho Công Thức Hóa Học THCS</h2>
+                            <p style="color: var(--text-muted); font-size: 14px;">Đầy đủ công thức Lớp 8–9 chia theo nhóm chuyên đề.</p>
+                        </div>
+                        <button class="btn-secondary" onclick="openValencyModal()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Lập CTHH theo Hóa trị
+                        </button>
+                    </div>
+
+                    <div id="formula-groups-container">
+                        <!-- Injected dynamically by JS -->
+                    </div>
+                </section>
+
+                <!-- VIEW 3: MÁY TÍNH HÓA (15 DẠNG BÀI) -->
+                <section id="calculator-view" class="page-view">
+                    <div class="calc-split-layout">
+                        <!-- Left Form Panel -->
+                        <div class="chem-card">
+                            <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px; color: var(--accent-cyan);">
+                                <i class="fa-solid fa-calculator"></i> Máy Tính Hóa Học THCS
+                            </h2>
+
+                            <div class="form-group-chem">
+                                <label>Chọn Dạng Bài Tập:</label>
+                                <select id="calc-mode-dropdown" onchange="onCalcModeChange(this.value)">
+                                    <option value="mol_by_mass">1. Tính số mol (n = m / M)</option>
+                                    <option value="mass_by_mol">2. Tính khối lượng (m = n × M)</option>
+                                    <option value="molar_mass_calc">3. Tính khối lượng mol (M = m / n)</option>
+                                    <option value="vol_by_mol">4. Tính thể tích khí (V = n × Vm)</option>
+                                    <option value="mol_by_vol">5. Tính số mol từ thể tích khí (n = V / Vm)</option>
+                                    <option value="c_percent">6. Tính nồng độ phần trăm (C% = m_ct / m_dd × 100)</option>
+                                    <option value="m_solute">7. Tính khối lượng chất tan (m_ct)</option>
+                                    <option value="m_solution">8. Tính khối lượng dung dịch (m_dd)</option>
+                                    <option value="cm_molarity">9. Tính nồng độ Mol (C_M = n / V)</option>
+                                    <option value="mol_from_cm">10. Tính số mol từ C_M và V</option>
+                                    <option value="vol_solution">11. Tính thể tích dung dịch (V = n / C_M)</option>
+                                    <option value="gas_density">12. Tính tỉ khối chất khí (d_A/B)</option>
+                                </select>
+                            </div>
+
+                            <!-- Dynamic Input Controls -->
+                            <div id="calc-dynamic-inputs"></div>
+
+                            <div class="form-group-chem" style="margin-top: 16px;">
+                                <label>Làm tròn kết quả:</label>
+                                <select id="calc-rounding-select">
+                                    <option value="2">2 chữ số thập phân (Mặc định)</option>
+                                    <option value="3">3 chữ số thập phân</option>
+                                    <option value="4">4 chữ số thập phân</option>
+                                    <option value="exact">Không làm tròn (Chính xác)</option>
+                                </select>
+                            </div>
+
+                            <button class="btn-primary" style="width: 100%; justify-content: center; margin-top: 12px;" onclick="runCalculation()">
+                                <i class="fa-solid fa-play"></i> Tính Kết Quả ngay
+                            </button>
+                        </div>
+
+                        <!-- Right Result Step Panel -->
+                        <div class="result-highlight-card" id="calc-result-panel" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">KẾT QUẢ TÍNH TOÁN</span>
+                                <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="copyResultText()">
+                                    <i class="fa-solid fa-copy"></i> Sao chép kết quả
+                                </button>
+                            </div>
+                            <div class="result-big-val" id="res-big-val">n = 0.10 mol</div>
+                            
+                            <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-secondary);">Lời giải chi tiết từng bước:</div>
+                            <div class="step-box" id="res-step-box"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: PHƯƠNG TRÌNH HÓA HỌC -->
+                <section id="equations-view" class="page-view">
+                    <div class="chem-card" style="margin-bottom: 24px;">
+                        <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 12px; color: var(--accent-cyan);">
+                            <i class="fa-solid fa-vial-circle-check"></i> Cân Bằng Phương Trình Hóa Học
+                        </h2>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                            Nhập phương trình dạng: <code>Fe + O2 -> Fe3O4</code> hoặc <code>Al + H2SO4 -> Al2(SO4)3 + H2</code>
+                        </p>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                            <input type="text" id="eq-input-val" style="flex: 1; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-family: 'Fira Code', monospace;" placeholder="Ví dụ: Fe + O2 -> Fe3O4">
+                            <button class="btn-primary" onclick="runEquationBalance()"><i class="fa-solid fa-wand-magic-sparkles"></i> Cân bằng</button>
+                            <button class="btn-secondary" onclick="document.getElementById('eq-input-val').value=''"><i class="fa-solid fa-trash"></i> Xóa</button>
+                        </div>
+
+                        <!-- Balanced Result Box -->
+                        <div id="eq-balance-output" style="display: none;">
+                            <div class="formula-math-display" id="eq-balanced-str" style="font-size: 20px; color: var(--accent-emerald);"></div>
+
+                            <div style="margin-top: 16px;">
+                                <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">Kiểm tra số nguyên tử 2 vế:</h4>
+                                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                    <thead>
+                                        <tr style="background: var(--bg-input); text-align: left;">
+                                            <th style="padding: 8px;">Nguyên tố</th>
+                                            <th style="padding: 8px;">Vế Trái (Tham gia)</th>
+                                            <th style="padding: 8px;">Vế Phải (Sản phẩm)</th>
+                                            <th style="padding: 8px;">Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="eq-atom-check-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 5: BẢNG TUẦN HOÀN 118 NGUYÊN TỐ -->
+                <section id="periodic-view" class="page-view">
+                    <!-- Integrated Formula Parser Tool -->
+                    <div class="chem-card" style="margin-bottom: 24px; border-left: 4px solid var(--accent-purple);">
+                        <h3 style="font-size: 18px; font-weight: 800; color: var(--accent-purple); margin-bottom: 8px;">
+                            <i class="fa-solid fa-calculator"></i> Parser Phân Tích Công Thức Hóa Học & Phân Tử Khối (M_r)
+                        </h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+                            Nhập công thức chứa dấu ngoặc phức tạp (Ví dụ: <code>CaCO3</code>, <code>Ca(OH)2</code>, <code>Al2(SO4)3</code>, <code>(NH4)2SO4</code>) để hệ thống tự động tra cứu dữ liệu 118 nguyên tố.
+                        </p>
+
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="parser-formula-input" placeholder="Ví dụ: Al2(SO4)3 hoặc CaCO3" style="flex: 1; padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-family: 'Fira Code', monospace;">
+                            <button class="btn-primary" style="background: var(--accent-purple);" onclick="runFormulaParser()"><i class="fa-solid fa-magnifying-glass"></i> Phân tích M_r & % Khối lượng</button>
+                        </div>
+
+                        <div id="parser-result-box" style="display: none; margin-top: 16px;"></div>
+                    </div>
+
+                    <!-- Periodic Controls Bar -->
+                    <div class="periodic-controls-bar">
+                        <div class="global-search-box" style="width: 320px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="elem-search" placeholder="Tìm theo số Z, ký hiệu (Fe), tên Việt/Anh..." oninput="filterElements()">
+                        </div>
+
+                        <div id="elem-category-filter" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            <button class="btn-secondary active" style="padding: 4px 10px; font-size: 12px;" onclick="filterElemCategory('all', this)">Tất cả (118)</button>
+                            <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="filterElemCategory('alkali', this)">Kiềm</button>
+                            <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="filterElemCategory('alkaline', this)">Kiềm thổ</button>
+                            <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="filterElemCategory('transition', this)">Chuyển tiếp</button>
+                            <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="filterElemCategory('nonmetal', this)">Phi kim</button>
+                            <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="filterElemCategory('halogen', this)">Halogen</button>
+                            <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="filterElemCategory('noble', this)">Khí hiếm</button>
+                        </div>
+
+                        <div style="font-size: 12px; font-weight: 700; color: var(--accent-emerald);" id="periodic-validation-status">
+                            Periodic Table: 118/118 elements loaded ✓
+                        </div>
+                    </div>
+
+                    <!-- 118 Elements Grid Wrapper -->
+                    <div class="periodic-scroll-wrapper">
+                        <div class="periodic-grid-18" id="periodic-table-grid-container"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 6: BÀI TẬP NHANH -->
+                <section id="quiz-view" class="page-view">
+                    <div class="chem-card" style="max-width: 650px; margin: 0 auto;">
+                        <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 12px; color: var(--accent-cyan);">
+                            <i class="fa-solid fa-pen-to-square"></i> Luyện Tập Bài Tập Hóa THCS Nhanh
+                        </h2>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                            Sinh câu hỏi tự động ngẫu nhiên về số mol, khối lượng, nồng độ và thể tích khí.
+                        </p>
+
+                        <button class="btn-primary" style="margin-bottom: 20px;" onclick="generateRandomQuiz()">
+                            <i class="fa-solid fa-rotate"></i> Tạo câu hỏi mới
+                        </button>
+
+                        <div id="quiz-question-box" style="background: var(--bg-input); padding: 18px; border-radius: var(--radius-md); font-weight: 700; font-size: 16px; margin-bottom: 16px;"></div>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                            <input type="number" step="any" id="quiz-user-answer" placeholder="Nhập đáp án số của bạn..." style="flex: 1; padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <button class="btn-primary" onclick="checkQuizAnswer()">Kiểm tra</button>
+                        </div>
+
+                        <div id="quiz-feedback-box" style="display: none;"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 7: CÔNG THỨC YÊU THÍCH -->
+                <section id="favorites-view" class="page-view">
+                    <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 16px;"><i class="fa-solid fa-star" style="color: var(--accent-amber);"></i> Công Thức Đã Lưu Yêu Thích</h2>
+                    <div id="favorites-list-container" class="grid-cards"></div>
+                </section>
+
+                <!-- VIEW 8: LỊCH SỬ TÍNH TOÁN -->
+                <section id="history-view" class="page-view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="font-size: 22px; font-weight: 900;"><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Tính Toán</h2>
+                        <button class="btn-secondary" style="color: #ef4444;" onclick="clearAllHistory()"><i class="fa-solid fa-trash"></i> Xóa toàn bộ lịch sử</button>
+                    </div>
+                    <div id="history-list-container"></div>
+                </section>
+
+                <!-- VIEW 9: GIỚI THIỆU & BẢNG TỔNG HỢP -->
+                <section id="settings-view" class="page-view">
+                    <div class="chem-card" style="margin-bottom: 24px;">
+                        <h2 style="font-size: 22px; font-weight: 900; color: var(--accent-cyan); margin-bottom: 8px;">Về CHEM THCS</h2>
+                        <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                            <strong>CHEM THCS</strong> là ứng dụng web học tập tương tác hỗ trợ học sinh THCS (Lớp 8–9) tra cứu công thức, học lý thuyết cơ bản và tính toán nhanh bài tập Hóa học với chức năng thực 100%.
+                        </p>
+                        <div style="background: rgba(2, 132, 199, 0.08); padding: 14px; border-radius: var(--radius-md); font-size: 13px; color: var(--accent-cyan);">
+                            <strong>Ghi chú giáo dục:</strong> Đây là công cụ hỗ trợ học tập. Học sinh nên hiểu bản chất cách làm từng bước thay vì chỉ lấy đáp án cuối cùng.
+                        </div>
+                    </div>
+
+                    <div class="chem-card">
+                        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Bảng Tổng Hợp Công Thức Hóa THCS</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background: var(--bg-input); text-align: left;">
+                                    <th style="padding: 10px;">Đại lượng</th>
+                                    <th style="padding: 10px;">Công thức chính</th>
+                                    <th style="padding: 10px;">Đơn vị</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">Số mol</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color); font-family: monospace;">n = m / M</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">mol</td></tr>
+                                <tr><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">Khối lượng</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color); font-family: monospace;">m = n × M</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">gam (g)</td></tr>
+                                <tr><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">Thể tích khí ĐKTC</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color); font-family: monospace;">V = n × 22,4</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">lít (L)</td></tr>
+                                <tr><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">Nồng độ phần trăm</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color); font-family: monospace;">C% = (m_ct / m_dd) × 100%</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">%</td></tr>
+                                <tr><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">Nồng độ Mol</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color); font-family: monospace;">C_M = n / V_dd</td><td style="padding: 8px; border-bottom: 1px solid var(--border-color);">M (mol/L)</td></tr>
+                                <tr><td style="padding: 8px;">Tỉ khối chất khí</td><td style="padding: 8px; font-family: monospace;">d_(A/B) = M_A / M_B</td><td style="padding: 8px;">lần</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Element Detail Modal -->
+    <div class="modal-overlay" id="elem-detail-modal" onclick="closeElementModal(event)">
+        <div class="modal-body-card" onclick="event.stopPropagation()">
+            <button class="btn-secondary" style="position: absolute; top: 16px; right: 16px; padding: 4px 10px;" onclick="closeElementModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div id="elem-modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Valency Solver Modal -->
+    <div class="modal-overlay" id="valency-modal" onclick="closeValencyModal(event)">
+        <div class="modal-body-card" onclick="event.stopPropagation()">
+            <button class="btn-secondary" style="position: absolute; top: 16px; right: 16px; padding: 4px 10px;" onclick="closeValencyModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 14px; color: var(--accent-cyan);">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Lập CTHH Theo Quy Tắc Hóa Trị
+            </h3>
+            
+            <div class="form-group-chem">
+                <label>Ký hiệu Nguyên tố A (Ví dụ: Al, Ca, Na, Fe):</label>
+                <input type="text" id="val-elem-a" placeholder="Ví dụ: Al">
+            </div>
+            <div class="form-group-chem">
+                <label>Hóa trị nguyên tố A (La Mã hoặc Số):</label>
+                <input type="number" id="val-val-a" placeholder="Ví dụ: 3 cho III">
+            </div>
+            <div class="form-group-chem">
+                <label>Ký hiệu Nguyên tố B / Nhóm (Ví dụ: O, OH, SO4):</label>
+                <input type="text" id="val-elem-b" placeholder="Ví dụ: O">
+            </div>
+            <div class="form-group-chem">
+                <label>Hóa trị nguyên tố B / Nhóm:</label>
+                <input type="number" id="val-val-b" placeholder="Ví dụ: 2 cho II">
+            </div>
+
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="runValencySolver()">Tạo Công Thức Hóa Học</button>
+            <div id="valency-result-box" style="margin-top: 14px; display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Scripts Loading -->
+    <script src="static/js/chem_thcs/data/elements.js"></script>
+    <script src="static/js/chem_thcs/data/formulas.js"></script>
+    <script src="static/js/chem_thcs/data/valencies.js"></script>
+    <script src="static/js/chem_thcs/utils/formulaParser.js"></script>
+    <script src="static/js/chem_thcs/utils/equationBalancer.js"></script>
+    <script src="static/js/chem_thcs/utils/calculator.js"></script>
+    <script src="static/js/chem_thcs/utils/storage.js"></script>
+    
+    <!-- Main App Controller Logic -->
+    <script>
+        // Router / View Navigation
+        function navigateTo(viewId, clickedNavBtn = null) {
+            document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
+            const target = document.getElementById(viewId);
+            if (target) target.classList.add('active');
+
+            if (clickedNavBtn) {
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                clickedNavBtn.classList.add('active');
+            }
+
+            // Update Header Title
+            const titleMap = {
+                'home-view': '<i class="fa-solid fa-house"></i> Trang chủ',
+                'formulas-view': '<i class="fa-solid fa-book-open"></i> Kho công thức',
+                'calculator-view': '<i class="fa-solid fa-calculator"></i> Máy tính Hóa',
+                'equations-view': '<i class="fa-solid fa-vial-circle-check"></i> Phương trình hóa học',
+                'periodic-view': '<i class="fa-solid fa-atom"></i> Bảng tuần hoàn 118 nguyên tố',
+                'quiz-view': '<i class="fa-solid fa-pen-to-square"></i> Luyện tập Bài tập',
+                'favorites-view': '<i class="fa-solid fa-star"></i> Công thức yêu thích',
+                'history-view': '<i class="fa-solid fa-clock-rotate-left"></i> Lịch sử tính toán',
+                'settings-view': '<i class="fa-solid fa-circle-info"></i> Giới thiệu & Tổng hợp'
+            };
+            document.getElementById('header-page-title').innerHTML = titleMap[viewId] || 'CHEM THCS';
+            
+            // Close mobile sidebar if open
+            document.getElementById('app-sidebar').classList.remove('mobile-open');
+
+            // Render specific views on load
+            if (viewId === 'formulas-view') renderFormulasView();
+            if (viewId === 'favorites-view') renderFavoritesView();
+            if (viewId === 'history-view') renderHistoryView();
+        }
+
+        // Theme Toggle
+        function initTheme() {
+            const savedTheme = StorageManager.getTheme();
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = savedTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            StorageManager.setTheme(next);
+            initTheme();
+        }
+
+        function toggleMobileSidebar() {
+            document.getElementById('app-sidebar').classList.toggle('mobile-open');
+        }
+
+        // Global Search Function
+        function onGlobalSearch(query) {
+            const overlay = document.getElementById('search-results-overlay');
+            const list = document.getElementById('search-results-list');
+            const q = query.trim().toLowerCase();
+
+            if (!q) {
+                overlay.style.display = 'none';
+                return;
+            }
+
+            let matches = [];
+
+            // Search Elements
+            ELEMENTS_DATA.forEach(e => {
+                if (e.nameVi.toLowerCase().includes(q) || e.symbol.toLowerCase().includes(q) || e.name.toLowerCase().includes(q) || e.atomicNumber.toString() === q) {
+                    matches.push({ type: 'element', title: `Nguyên tố: ${e.nameVi} (${e.symbol}) - Z=${e.atomicNumber}`, item: e });
+                }
+            });
+
+            // Search Formulas
+            FORMULA_GROUPS.forEach(g => {
+                g.items.forEach(f => {
+                    if (f.title.toLowerCase().includes(q) || f.formula.toLowerCase().includes(q)) {
+                        matches.push({ type: 'formula', title: `Công thức: ${f.title}`, item: f });
+                    }
+                });
+            });
+
+            if (matches.length === 0) {
+                list.innerHTML = `<div style="font-size: 13px; color: var(--text-muted);">Không tìm thấy kết quả phù hợp với "${query}".</div>`;
+            } else {
+                list.innerHTML = matches.slice(0, 8).map(m => `
+                    <div style="padding: 8px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer;" onclick="onSelectSearchResult('${m.type}', '${m.item.atomicNumber || m.item.id}')">
+                        <strong>${m.title}</strong>
+                    </div>
+                `).join('');
+            }
+            overlay.style.display = 'block';
+        }
+
+        function closeSearchOverlay() {
+            document.getElementById('search-results-overlay').style.display = 'none';
+        }
+
+        function onSelectSearchResult(type, id) {
+            closeSearchOverlay();
+            if (type === 'element') {
+                navigateTo('periodic-view');
+                const el = ELEMENTS_DATA.find(e => e.atomicNumber.toString() === id);
+                if (el) openElementModal(el);
+            } else {
+                navigateTo('formulas-view');
+            }
+        }
+
+        // Render Formulas View
+        function renderFormulasView() {
+            const container = document.getElementById('formula-groups-container');
+            if (!container) return;
+
+            container.innerHTML = FORMULA_GROUPS.map(g => `
+                <div style="margin-bottom: 28px;">
+                    <h3 style="font-size: 18px; font-weight: 800; color: var(--accent-cyan); margin-bottom: 14px;">${g.name}</h3>
+                    <div class="grid-cards">
+                        ${g.items.map(item => {
+                            const isFav = StorageManager.isFavorite(item.id);
+                            return `
+                                <div class="chem-card">
+                                    <button style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 18px; cursor: pointer; color: ${isFav ? 'var(--accent-amber)' : 'var(--text-muted)'};" onclick="toggleFavFormula('${item.id}', this)">
+                                        <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-star"></i>
+                                    </button>
+                                    <div class="card-title" style="padding-right: 30px;">${item.title}</div>
+                                    <div class="formula-math-display">${item.formula}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                                        ${item.variables.map(v => `<div><strong>${v.symbol}:</strong> ${v.desc}</div>`).join('')}
+                                    </div>
+                                    <div style="background: var(--bg-input); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 12px; margin-bottom: 12px;">
+                                        <strong>Ví dụ:</strong> ${item.example.problem} <br><em>${item.example.solution}</em>
+                                    </div>
+                                    <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="openCalcWithMode('${item.calcMode}')">
+                                        <i class="fa-solid fa-calculator"></i> Tính ngay
+                                    </button>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleFavFormula(id, btn) {
+            const isFav = StorageManager.toggleFavorite(id);
+            btn.innerHTML = `<i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-star"></i>`;
+            btn.style.color = isFav ? 'var(--accent-amber)' : 'var(--text-muted)';
+        }
+
+        function renderFavoritesView() {
+            const container = document.getElementById('favorites-list-container');
+            const favIds = StorageManager.getFavorites();
+            if (favIds.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; padding: 40px 0; text-align: center; color: var(--text-muted);">Bạn chưa lưu công thức yêu thích nào. Hãy nhấn biểu tượng ☆ ở các thẻ công thức!</div>`;
+                return;
+            }
+
+            let favItems = [];
+            FORMULA_GROUPS.forEach(g => {
+                g.items.forEach(i => {
+                    if (favIds.includes(i.id)) favItems.push(i);
+                });
+            });
+
+            container.innerHTML = favItems.map(item => `
+                <div class="chem-card">
+                    <div class="card-title">${item.title}</div>
+                    <div class="formula-math-display">${item.formula}</div>
+                    <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="openCalcWithMode('${item.calcMode}')">
+                        <i class="fa-solid fa-calculator"></i> Tính ngay
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Render 118 Elements Periodic Table
+        function render118PeriodicTable(filteredElements = ELEMENTS_DATA) {
+            const container = document.getElementById('periodic-table-grid-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const mapZ = {};
+            filteredElements.forEach(e => { mapZ[e.atomicNumber] = e; });
+
+            // Main 7 periods
+            for (let period = 1; period <= 7; period++) {
+                for (let group = 1; group <= 18; group++) {
+                    const el = ELEMENTS_DATA.find(e => e.period === period && e.group === group);
+                    if (el && mapZ[el.atomicNumber]) {
+                        container.appendChild(createElementCellUI(el));
+                    } else {
+                        const empty = document.createElement('div');
+                        empty.style.gridColumn = group;
+                        empty.style.gridRow = period;
+                        container.appendChild(empty);
+                    }
+                }
+            }
+
+            // Divider
+            const div = document.createElement('div');
+            div.style.gridColumn = '1 / -1';
+            div.style.height = '12px';
+            div.style.gridRow = '8';
+            container.appendChild(div);
+
+            // Lanthanides Z=57..71
+            ELEMENTS_DATA.filter(e => e.atomicNumber >= 57 && e.atomicNumber <= 71).forEach((el, idx) => {
+                if (mapZ[el.atomicNumber]) {
+                    const cell = createElementCellUI(el);
+                    cell.style.gridRow = '9';
+                    cell.style.gridColumn = `${idx + 3}`;
+                    container.appendChild(cell);
+                }
+            });
+
+            // Actinides Z=89..103
+            ELEMENTS_DATA.filter(e => e.atomicNumber >= 89 && e.atomicNumber <= 103).forEach((el, idx) => {
+                if (mapZ[el.atomicNumber]) {
+                    const cell = createElementCellUI(el);
+                    cell.style.gridRow = '10';
+                    cell.style.gridColumn = `${idx + 3}`;
+                    container.appendChild(cell);
+                }
+            });
+        }
+
+        function createElementCellUI(el) {
+            const div = document.createElement('div');
+            div.className = 'cell-element';
+            
+            const catColors = {
+                'alkali': '#ef4444', 'alkaline': '#f97316', 'transition': '#6366f1',
+                'post-transition': '#10b981', 'metalloid': '#eab308', 'nonmetal': '#38bdf8',
+                'halogen': '#06b6d4', 'noble': '#a855f7', 'lanthanide': '#ec4899', 'actinide': '#f43f5e'
+            };
+            const col = catColors[el.category] || '#0284c7';
+            div.style.borderColor = col;
+            div.style.background = `rgba(${hexToRgbVal(col)}, 0.08)`;
+
+            div.innerHTML = `
+                <span class="z-num">${el.atomicNumber}</span>
+                <span class="sym" style="color: ${col}">${el.symbol}</span>
+                <span class="name-vi">${el.nameVi}</span>
+                <span class="mass">${el.atomicMass}</span>
+            `;
+            div.onclick = () => openElementModal(el);
+            return div;
+        }
+
+        function hexToRgbVal(hex) {
+            let c = hex.replace('#', '');
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16);
+            return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
+        }
+
+        function openElementModal(el) {
+            const body = document.getElementById('elem-modal-content');
+            body.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                    <div style="width: 70px; height: 70px; border-radius: 14px; background: rgba(2, 132, 199, 0.1); border: 2px solid var(--accent-cyan); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">${el.atomicNumber}</span>
+                        <span style="font-size: 28px; font-weight: 900; color: var(--accent-cyan);">${el.symbol}</span>
+                    </div>
+                    <div>
+                        <h2 style="font-size: 22px; font-weight: 800; color: var(--text-primary); margin: 0;">${el.nameVi} (${el.name})</h2>
+                        <span style="display: inline-block; padding: 2px 8px; border-radius: 10px; background: var(--accent-cyan); color: white; font-size: 11px; font-weight: 700; margin-top: 4px;">
+                            ${el.category.toUpperCase()}
+                        </span>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
+                    <div style="background: var(--bg-input); padding: 10px; border-radius: 8px;"><strong>Số hiệu Z:</strong> ${el.atomicNumber}</div>
+                    <div style="background: var(--bg-input); padding: 10px; border-radius: 8px;"><strong>Nguyên tử khối:</strong> ${el.atomicMass} g/mol</div>
+                    <div style="background: var(--bg-input); padding: 10px; border-radius: 8px;"><strong>Chu kỳ:</strong> ${el.period}</div>
+                    <div style="background: var(--bg-input); padding: 10px; border-radius: 8px;"><strong>Nhóm:</strong> ${el.group}</div>
+                    <div style="background: var(--bg-input); padding: 10px; border-radius: 8px;"><strong>Block:</strong> ${el.block}</div>
+                    <div style="background: var(--bg-input); padding: 10px; border-radius: 8px;"><strong>Trạng thái (25°C):</strong> ${el.stateAtRoomTemperature.toUpperCase()}</div>
+                </div>
+            `;
+            document.getElementById('elem-detail-modal').classList.add('open');
+        }
+
+        function closeElementModal() {
+            document.getElementById('elem-detail-modal').classList.remove('open');
+        }
+
+        function filterElements() {
+            const q = document.getElementById('elem-search').value.toLowerCase().trim();
+            if (!q) { render118PeriodicTable(ELEMENTS_DATA); return; }
+            const filtered = ELEMENTS_DATA.filter(e => 
+                e.nameVi.toLowerCase().includes(q) ||
+                e.name.toLowerCase().includes(q) ||
+                e.symbol.toLowerCase().includes(q) ||
+                e.atomicNumber.toString() === q
+            );
+            render118PeriodicTable(filtered);
+        }
+
+        function filterElemCategory(cat, btn) {
+            document.querySelectorAll('#elem-category-filter .btn-secondary').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (cat === 'all') render118PeriodicTable(ELEMENTS_DATA);
+            else render118PeriodicTable(ELEMENTS_DATA.filter(e => e.category === cat));
+        }
+
+        // Formula Parser Runner
+        function runFormulaParser() {
+            const formulaStr = document.getElementById('parser-formula-input').value.trim();
+            const resBox = document.getElementById('parser-result-box');
+            if (!formulaStr) { alert("Vui lòng nhập công thức hóa học."); return; }
+
+            try {
+                const parsed = calculateElementMassPercentages(formulaStr);
+                resBox.innerHTML = `
+                    <div style="font-size: 16px; font-weight: 800; color: var(--accent-purple); margin-bottom: 8px;">
+                        M_r(${parsed.formula}) = ${parsed.molarMass} g/mol
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: var(--bg-input); text-align: left;">
+                                <th style="padding: 6px;">Nguyên tố</th>
+                                <th style="padding: 6px;">Số nguyên tử</th>
+                                <th style="padding: 6px;">Khối lượng</th>
+                                <th style="padding: 6px;">% Khối lượng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${parsed.percentages.map(p => `
+                                <tr>
+                                    <td style="padding: 6px; border-bottom: 1px solid var(--border-color);"><strong>${p.symbol}</strong> (${p.nameVi})</td>
+                                    <td style="padding: 6px; border-bottom: 1px solid var(--border-color);">${p.count}</td>
+                                    <td style="padding: 6px; border-bottom: 1px solid var(--border-color);">${p.subTotalMass} g</td>
+                                    <td style="padding: 6px; border-bottom: 1px solid var(--border-color); font-weight: 700; color: var(--accent-cyan);">${p.percentage}%</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                resBox.style.display = 'block';
+            } catch (err) {
+                alert("Lỗi: " + err.message);
+            }
+        }
+
+        // Calculator Controls Setup
+        function openCalcWithMode(modeId) {
+            navigateTo('calculator-view');
+            const select = document.getElementById('calc-mode-dropdown');
+            if (select) {
+                select.value = modeId;
+                onCalcModeChange(modeId);
+            }
+        }
+
+        function onCalcModeChange(modeId) {
+            const container = document.getElementById('calc-dynamic-inputs');
+            document.getElementById('calc-result-panel').style.display = 'none';
+
+            let html = '';
+            if (modeId === 'mol_by_mass') {
+                html = `
+                    <div class="form-group-chem"><label>Khối lượng m (g):</label><input type="number" step="any" id="inp-m" placeholder="Ví dụ: 5.6"></div>
+                    <div class="form-group-chem"><label>Khối lượng mol M (g/mol):</label><input type="number" step="any" id="inp-M" placeholder="Ví dụ: 56"></div>
+                `;
+            } else if (modeId === 'mass_by_mol') {
+                html = `
+                    <div class="form-group-chem"><label>Số mol n (mol):</label><input type="number" step="any" id="inp-n" placeholder="Ví dụ: 0.5"></div>
+                    <div class="form-group-chem"><label>Khối lượng mol M (g/mol):</label><input type="number" step="any" id="inp-M" placeholder="Ví dụ: 18"></div>
+                `;
+            } else if (modeId === 'molar_mass_calc') {
+                html = `
+                    <div class="form-group-chem"><label>Khối lượng m (g):</label><input type="number" step="any" id="inp-m" placeholder="Ví dụ: 8"></div>
+                    <div class="form-group-chem"><label>Số mol n (mol):</label><input type="number" step="any" id="inp-n" placeholder="Ví dụ: 0.2"></div>
+                `;
+            } else if (modeId === 'vol_by_mol') {
+                html = `
+                    <div class="form-group-chem"><label>Số mol n (mol):</label><input type="number" step="any" id="inp-n" placeholder="Ví dụ: 0.5"></div>
+                    <div class="form-group-chem"><label>Thể tích mol Vm:</label>
+                        <select id="inp-Vm"><option value="22.4">22.4 L/mol (ĐKTC)</option><option value="24.79">24.79 L/mol (ĐKC 25°C)</option></select>
+                    </div>
+                `;
+            } else if (modeId === 'mol_by_vol') {
+                html = `
+                    <div class="form-group-chem"><label>Thể tích V (lít):</label><input type="number" step="any" id="inp-V" placeholder="Ví dụ: 4.48"></div>
+                    <div class="form-group-chem"><label>Thể tích mol Vm:</label>
+                        <select id="inp-Vm"><option value="22.4">22.4 L/mol (ĐKTC)</option><option value="24.79">24.79 L/mol (ĐKC 25°C)</option></select>
+                    </div>
+                `;
+            } else if (modeId === 'c_percent') {
+                html = `
+                    <div class="form-group-chem"><label>Khối lượng chất tan m_ct (g):</label><input type="number" step="any" id="inp-mct" placeholder="Ví dụ: 20"></div>
+                    <div class="form-group-chem"><label>Khối lượng dung dịch m_dd (g):</label><input type="number" step="any" id="inp-mdd" placeholder="Ví dụ: 100"></div>
+                `;
+            } else if (modeId === 'm_solute') {
+                html = `
+                    <div class="form-group-chem"><label>Nồng độ phần trăm C% (%):</label><input type="number" step="any" id="inp-Cpct" placeholder="Ví dụ: 10"></div>
+                    <div class="form-group-chem"><label>Khối lượng dung dịch m_dd (g):</label><input type="number" step="any" id="inp-mdd" placeholder="Ví dụ: 200"></div>
+                `;
+            } else if (modeId === 'm_solution') {
+                html = `
+                    <div class="form-group-chem"><label>Khối lượng chất tan m_ct (g):</label><input type="number" step="any" id="inp-mct" placeholder="Ví dụ: 5"></div>
+                    <div class="form-group-chem"><label>Nồng độ phần trăm C% (%):</label><input type="number" step="any" id="inp-Cpct" placeholder="Ví dụ: 10"></div>
+                `;
+            } else if (modeId === 'cm_molarity') {
+                html = `
+                    <div class="form-group-chem"><label>Số mol n (mol):</label><input type="number" step="any" id="inp-n" placeholder="Ví dụ: 0.5"></div>
+                    <div class="form-group-chem"><label>Thể tích dung dịch V:</label><input type="number" step="any" id="inp-V" placeholder="Ví dụ: 2"></div>
+                    <div class="form-group-chem"><label>Đơn vị thể tích:</label>
+                        <select id="inp-unitV"><option value="L">Lít (L)</option><option value="ml">Mililit (mL)</option></select>
+                    </div>
+                `;
+            } else if (modeId === 'mol_from_cm') {
+                html = `
+                    <div class="form-group-chem"><label>Nồng độ mol C_M (M):</label><input type="number" step="any" id="inp-CM" placeholder="Ví dụ: 0.25"></div>
+                    <div class="form-group-chem"><label>Thể tích dung dịch V:</label><input type="number" step="any" id="inp-V" placeholder="Ví dụ: 2"></div>
+                    <div class="form-group-chem"><label>Đơn vị thể tích:</label>
+                        <select id="inp-unitV"><option value="L">Lít (L)</option><option value="ml">Mililit (mL)</option></select>
+                    </div>
+                `;
+            } else if (modeId === 'vol_solution') {
+                html = `
+                    <div class="form-group-chem"><label>Số mol n (mol):</label><input type="number" step="any" id="inp-n" placeholder="Ví dụ: 0.5"></div>
+                    <div class="form-group-chem"><label>Nồng độ mol C_M (M):</label><input type="number" step="any" id="inp-CM" placeholder="Ví dụ: 0.25"></div>
+                `;
+            } else if (modeId === 'gas_density') {
+                html = `
+                    <div class="form-group-chem"><label>Khối lượng mol M_A (g/mol):</label><input type="number" step="any" id="inp-MA" placeholder="Ví dụ: 44 cho CO2"></div>
+                    <div class="form-group-chem"><label>So sánh với:</label>
+                        <select id="inp-targetType" onchange="document.getElementById('group-mb').style.display = this.value==='gasB'?'block':'none'">
+                            <option value="air">Không khí (M = 29)</option>
+                            <option value="gasB">Khí B tùy chọn</option>
+                        </select>
+                    </div>
+                    <div class="form-group-chem" id="group-mb" style="display:none;"><label>Khối lượng mol M_B (g/mol):</label><input type="number" step="any" id="inp-MB" placeholder="Ví dụ: 2 cho H2"></div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        let currentCalculationResultText = "";
+
+        function runCalculation() {
+            const modeId = document.getElementById('calc-mode-dropdown').value;
+            const decimals = document.getElementById('calc-rounding-select').value;
+            const inputs = {};
+
+            // Gather inputs dynamically
+            const inpIds = ['m', 'M', 'n', 'V', 'Vm', 'mct', 'mdd', 'Cpct', 'CM', 'unitV', 'MA', 'MB', 'targetType'];
+            inpIds.forEach(id => {
+                const el = document.getElementById(`inp-${id}`);
+                if (el) inputs[id] = el.value;
+            });
+
+            try {
+                const res = solveChemCalculation(modeId, inputs, decimals);
+                document.getElementById('res-big-val').innerText = `${res.formattedResult} ${res.unit}`;
+                document.getElementById('res-step-box').innerText = res.fullStepsText;
+                document.getElementById('calc-result-panel').style.display = 'block';
+
+                currentCalculationResultText = res.fullStepsText;
+
+                // Save to history
+                StorageManager.addHistoryRecord({
+                    mode: modeId,
+                    inputs: inputs,
+                    resultText: `${res.formattedResult} ${res.unit}`,
+                    fullText: res.fullStepsText
+                });
+
+            } catch (err) {
+                alert("⚠️ " + err.message);
+            }
+        }
+
+        function copyResultText() {
+            if (!currentCalculationResultText) return;
+            navigator.clipboard.writeText(currentCalculationResultText).then(() => {
+                alert("📋 Đã sao chép kết quả vào clipboard!");
+            });
+        }
+
+        // Equation Balancer UI
+        function runEquationBalance() {
+            const val = document.getElementById('eq-input-val').value.trim();
+            const out = document.getElementById('eq-balance-output');
+            if (!val) { alert("Vui lòng nhập phương trình hóa học."); return; }
+
+            try {
+                const res = balanceAndVerifyEquation(val);
+                document.getElementById('eq-balanced-str').innerText = res.balanced;
+
+                const tbody = document.getElementById('eq-atom-check-table');
+                tbody.innerHTML = res.atomCheck.map(a => `
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid var(--border-color);"><strong>${a.element}</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${a.left}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${a.right}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid var(--border-color); color: var(--accent-emerald); font-weight: 700;">✅ Cân bằng (${a.left} = ${a.right})</td>
+                    </tr>
+                `).join('');
+
+                out.style.display = 'block';
+            } catch (err) {
+                alert("⚠️ " + err.message);
+            }
+        }
+
+        // Valency Modal Solver
+        function openValencyModal() {
+            document.getElementById('valency-modal').classList.add('open');
+        }
+        function closeValencyModal() {
+            document.getElementById('valency-modal').classList.remove('open');
+        }
+        function runValencySolver() {
+            const eA = document.getElementById('val-elem-a').value.trim();
+            const vA = parseInt(document.getElementById('val-val-a').value, 10);
+            const eB = document.getElementById('val-elem-b').value.trim();
+            const vB = parseInt(document.getElementById('val-val-b').value, 10);
+            const box = document.getElementById('valency-result-box');
+
+            try {
+                const res = solveFormulaByValency(eA, vA, eB, vB);
+                box.innerHTML = `
+                    <div style="font-size: 20px; font-weight: 900; color: var(--accent-purple); font-family: monospace;">CTHH: ${res.formula}</div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">${res.explanation}</div>
+                `;
+                box.style.display = 'block';
+            } catch (e) {
+                alert("⚠️ " + e.message);
+            }
+        }
+
+        // Quiz Generator
+        let currentQuizAnswer = 0;
+
+        function generateRandomQuiz() {
+            const qBox = document.getElementById('quiz-question-box');
+            const fBox = document.getElementById('quiz-feedback-box');
+            fBox.style.display = 'none';
+            document.getElementById('quiz-user-answer').value = '';
+
+            const types = [
+                { q: "Tính số mol của 5,6 g Fe. (Fe = 56)", ans: 0.1 },
+                { q: "Tính khối lượng của 0,5 mol H₂O. (M = 18)", ans: 9 },
+                { q: "Tính thể tích của 0,2 mol khí CO₂ ở ĐKTC.", ans: 4.48 },
+                { q: "Hòa tan 20 g NaCl vào 80 g nước. Tính C%.", ans: 20 },
+                { q: "Hòa tan 0,5 mol NaOH vào nước được 2 lít dung dịch. Tính C_M.", ans: 0.25 }
+            ];
+
+            const pick = types[Math.floor(Math.random() * types.length)];
+            qBox.innerText = pick.q;
+            currentQuizAnswer = pick.ans;
+        }
+
+        function checkQuizAnswer() {
+            const uAns = parseFloat(document.getElementById('quiz-user-answer').value);
+            const fBox = document.getElementById('quiz-feedback-box');
+            if (isNaN(uAns)) { alert("Vui lòng nhập đáp án."); return; }
+
+            if (Math.abs(uAns - currentQuizAnswer) < 0.05) {
+                fBox.innerHTML = `<div style="background: rgba(5, 150, 105, 0.1); color: var(--accent-emerald); padding: 12px; border-radius: var(--radius-md); font-weight: 700;">🎉 Chính xác! Đáp án đúng là ${currentQuizAnswer}.</div>`;
+            } else {
+                fBox.innerHTML = `<div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 12px; border-radius: var(--radius-md); font-weight: 700;">❌ Chưa đúng. Đáp án chính xác là ${currentQuizAnswer}.</div>`;
+            }
+            fBox.style.display = 'block';
+        }
+
+        // History View Render
+        function renderHistoryView() {
+            const container = document.getElementById('history-list-container');
+            const hist = StorageManager.getHistory();
+
+            if (hist.length === 0) {
+                container.innerHTML = `<div style="padding: 40px 0; text-align: center; color: var(--text-muted);">Chưa có lịch sử tính toán nào.</div>`;
+                return;
+            }
+
+            container.innerHTML = hist.map(h => `
+                <div class="chem-card" style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 12px; color: var(--text-muted);">${h.timestamp}</span>
+                        <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="removeHistory('${h.id}')">Xóa</button>
+                    </div>
+                    <div style="font-weight: 800; color: var(--accent-cyan); font-size: 16px;">${h.resultText}</div>
+                    <div class="step-box" style="margin-top: 8px; font-size: 12px;">${h.fullText}</div>
+                </div>
+            `).join('');
+        }
+
+        function removeHistory(id) {
+            StorageManager.removeHistoryRecord(id);
+            renderHistoryView();
+        }
+
+        function clearAllHistory() {
+            if (confirm("Bạn có chắc muốn xóa tất cả lịch sử tính toán?")) {
+                StorageManager.clearHistory();
+                renderHistoryView();
+            }
+        }
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            render118PeriodicTable();
+            onCalcModeChange('mol_by_mass');
+            generateRandomQuiz();
+        });
+    </script>
+</body>
+</html>
